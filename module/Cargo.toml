@@ -1,0 +1,14 @@
+[package]
+name = "module"
+version = "0.1.0"
+authors = ["Joey Ezechiëls <joey.ezechiels@gmail.com>"]
+description = "Emacs module that provides Elisp bindings for libcereal."
+
+[dependencies]
+libc = "0.2"
+emacs_module_bindings =  { git = "https://github.com/jjpe/emacs_module_bindings.git" }
+cereal = { path = "../../libcereal" }
+
+[lib]
+name = "libcereal_module"
+crate-type = ["cdylib"]
