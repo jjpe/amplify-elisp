@@ -6,7 +6,7 @@ description = "Emacs module that provides Elisp bindings for libcereal."
 
 [dependencies]
 libc = "0.2"
-emacs_module_bindings =  { git = "https://github.com/jjpe/emacs_module_bindings.git" }
+emacs_module_bindings = { git = "https://github.com/jjpe/emacs_module_bindings.git" }
 cereal = { path = "../../libcereal" }
 
 [lib]
