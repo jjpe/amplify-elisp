@@ -74,31 +74,159 @@ init_module! { (env) {
                     "(msg)\n\n\
                      .")?;
 
-    // emacs::register(env, "cereal/msg-", Fmsg_,      2..2,
-    //                 "()\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/msg-set-origin", Fmsg_set_origin,      2..2,
+                    "(msg origin)\n\n\
+                     .")?;
 
+    emacs::register(env, "cereal/msg-get-origin", Fmsg_get_origin,      1..1,
+                    "(msg)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-set-contents", Fmsg_set_contents,      2..2,
+                    "(msg contents)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-get-contents", Fmsg_get_contents,      1..1,
+                    "(msg)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-add-region", Fmsg_add_region,      2..2,
+                    "(msg region)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-clear-regions", Fmsg_clear_regions,      1..1,
+                    "(msg)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-get-region", Fmsg_get_region,      2..2,
+                    "(msg index)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-count-regions", Fmsg_count_regions,      1..1,
+                    "(msg)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-get-language", Fmsg_get_language,      1..1,
+                    "(msg)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-set-language", Fmsg_set_language,      2..2,
+                    "(msg language)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-set-ast", Fmsg_set_ast,      2..2,
+                    "(msg ast)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-get-ast", Fmsg_get_ast,      1..1,
+                    "(msg)\n\n\
+                     .")?;
 
 
     /************************** Contents **************************/
-    // emacs::register(env, "cereal/contents-new", Fcontents_new,      0..0,
+    // emacs::register(env, "cereal/contents-new-text", Fcontents_new_text,      1..1,
+    //                 "(text)\n\n\
+    //                  Create a new Contents::Text object.")?;
+
+    // emacs::register(env, "cereal/contents-new-entries", Fcontents_new_entries,      0..0,
     //                 "()\n\n\
-    //                  Create a new Contents object.")?;
+    //                  Create a new Contents::Entries object.")?;
+
+    // emacs::register(env, "cereal/contents-is-text", Fcontents_is_text,      1..1,
+    //                 "(contents)\n\n\
+    //                  Return t iff. contents is Contents::Text, otherwise nil.")?;
+
+    // emacs::register(env, "cereal/contents-add-text", Fcontents_add_text,      2..2,
+    //                 "(contents text)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/contents-get-text", Fcontents_get_text,      1..1,
+    //                 "(contents)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/contents-is-entries", Fcontents_is_entries,      1..1,
+    //                 "(contents)\n\n\
+    //                  Return t iff. contents is Contents::Entries, otherwise nil.")?;
+
+    // emacs::register(env, "cereal/contents-add-entry", Fcontents_add_entry,      2..2,
+    //                 "(contents entry)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/contents-get-entry", Fcontents_get_entry,      2..2,
+    //                 "(contents index)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/contents-count-entries", Fcontents_count_entries,      1..1,
+    //                 "(msg)\n\n\
+    //                  .")?;
+
 
     /************************** Region **************************/
     // emacs::register(env, "cereal/region-new", Fregion_new,      0..0,
     //                 "()\n\n\
     //                  Create a new Region object.")?;
 
+    // emacs::register(env, "cereal/region-get-begin", Fregion_get_begin,      1..1,
+    //                 "(region)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/region-get-end", Fregion_get_end,      1..1,
+    //                 "(region)\n\n\
+    //                  .")?;
+
+
     /************************** Language  **************************/
-    // emacs::register(env, "cereal/language-new", Flanguage_new,      0..0,
-    //                 "()\n\n\
+    // emacs::register(env, "cereal/language-new", Flanguage_new,      1..1,
+    //                 "(name)\n\n\
     //                  Create a new Language object.")?;
 
+    // emacs::register(env, "cereal/language-set-name", Flanguage_set_name,      2..2,
+    //                 "(language name)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/language-get-name", Flanguage_get_name,      1..1,
+    //                 "(language)\n\n\
+    //                  .")?;
+
+
     /************************** Ast **************************/
-    // emacs::register(env, "cereal/ast-new", Fast_new,      0..0,
-    //                 "()\n\n\
+    // emacs::register(env, "cereal/ast-new", Fast_new,      1..1,
+    //                 "(name)\n\n\
     //                  Create a new Ast object.")?;
+
+    // emacs::register(env, "cereal/ast-get-name", Fast_get_name,      1..1,
+    //                 "(ast)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/ast-set-data", Fast_set_data,      2..2,
+    //                 "(ast data)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/ast-get-data", Fast_get_data,      1..1,
+    //                 "(ast)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/ast-clear-data", Fast_clear_data,      1..1,
+    //                 "(ast)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/ast-add-child", Fast_add_child,      2..2,
+    //                 "(ast child)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/ast-get-child", Fast_get_child,      2..2,
+    //                 "(ast index)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/ast-clear-children", Fast_clear_children,      1..1,
+    //                 "(ast)\n\n\
+    //                  .")?;
+
+    // emacs::register(env, "cereal/ast-count-children", Fast_count_children,      1..1,
+    //                 "(ast)\n\n\
+    //                  .")?;
+
+
 
 
     const MODULE_NAME: &str = "libcereal-module";
@@ -128,7 +256,7 @@ emacs_subrs! {
 
     Fuclient_rx_addr(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
-        let addr = e2n::string(env, *args.offset(1)).unwrap(/* TODO: ConvErr */);
+        let addr = e2n::string(env, *args.offset(1))?;
         let addr = Url::parse(addr.as_str()).unwrap(/* TODO: url ParseError */);
         uclient.set_receive_addr(addr);
         n2e::symbol(env, "nil")
@@ -136,7 +264,7 @@ emacs_subrs! {
 
     Fuclient_tx_addr(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
-        let addr = e2n::string(env, *args.offset(1)).unwrap(/* TODO: ConvErr */);
+        let addr = e2n::string(env, *args.offset(1))?;
         let addr = Url::parse(addr.as_str()).unwrap(/* TODO: url ParseError */);
         uclient.set_send_addr(addr);
         n2e::symbol(env, "nil")
@@ -158,14 +286,14 @@ emacs_subrs! {
 
     Fcclient_send(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
-        let msg: &Msg = e2n::mut_ref(env, args, 1).unwrap(/* TODO: ConvErr */);
+        let msg: &Msg = e2n::mut_ref(env, args, 1)?;
         cclient.send(msg).unwrap(/* TODO: ClientErr */);
         n2e::symbol(env, "nil")
     };
 
     Fcclient_receive(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
-        let msg: &mut Msg = e2n::mut_ref(env, args, 1).unwrap(/* TODO: ConvErr */);
+        let msg: &mut Msg = e2n::mut_ref(env, args, 1)?;
         cclient.receive(msg).unwrap(/* TODO: ClientErr */);
         n2e::symbol(env, "nil")
     };
@@ -178,8 +306,8 @@ emacs_subrs! {
 
     Fmsg_set_source(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        *msg.source_mut() = e2n::string(env, *args.offset(1)).unwrap(/* TODO: ConvErr */);
-        n2e::symbol(env, "nil")
+        *msg.source_mut() = e2n::string(env, *args.offset(1))?;
+        n2e::symbol(env, "t")
     };
 
     Fmsg_get_source(env, nargs, args, data, TAG) {
@@ -190,12 +318,12 @@ emacs_subrs! {
 
     Fmsg_set_request_number(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        let reqno: i64 = e2n::integer(env, args, 1).unwrap(/* TODO: ConvErr */);
+        let reqno: i64 = e2n::integer(env, args, 1)?;
         if reqno < 0 {
             // TODO: error: reqno >= 0 doesn't hold
         }
         *msg.request_number_mut() = reqno as u64;
-        n2e::symbol(env, "nil")
+        n2e::symbol(env, "t")
     };
 
     Fmsg_get_request_number(env, nargs, args, data, TAG) {
@@ -203,9 +331,128 @@ emacs_subrs! {
         n2e::integer(env, msg.request_number() as i64)
     };
 
-    // Fmsg_(env, nargs, args, data, TAG) {
-    //     let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-    // };
+    Fmsg_set_origin(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        let origin: EmacsVal = *args.offset(1);
+        if emacs::eq(env, origin, n2e::symbol(env, "nil")?)? {
+            *msg.origin_mut() = None;
+        } else {
+            *msg.origin_mut() = Some(e2n::string(env, origin)?);
+        }
+        n2e::symbol(env, "t")
+    };
+
+    Fmsg_get_origin(env, nargs, args, data, TAG) {
+        let msg: &Msg = e2n::mut_ref(env, args, 0)?;
+        match msg.origin_ref() {
+            None => n2e::symbol(env, "nil"),
+            Some(origin) => n2e::string(env, origin),
+        }
+    };
+
+    Fmsg_set_contents(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        let contents: EmacsVal = *args.offset(1);
+        let (t,  nil) = (n2e::symbol(env, "t")?,  n2e::symbol(env, "nil")?);
+
+        if emacs::eq(env, contents, nil)? {
+            *msg.contents_mut() = None;
+            return n2e::symbol(env, "t");
+        }
+
+        let is_string: EmacsVal = emacs::call(env, "stringp", &mut [contents]);
+        if emacs::eq(env, is_string, t)? {
+            let string: String = e2n::string(env, contents)?;
+            *msg.contents_mut() = Some(Contents::Text(string));
+            return n2e::symbol(env, "t");
+        }
+
+        let is_list: EmacsVal = emacs::call(env, "listp", &mut [contents]);
+        if emacs::eq(env, is_list, t)? {
+            let mut vec: Vec<String> = vec![];
+            for emacs_string_val in e2n::list(env, contents)?.into_iter() {
+                vec.push(e2n::string(env, emacs_string_val)?);
+            }
+            *msg.contents_mut() = Some(Contents::Entries(vec));
+            return n2e::symbol(env, "t");
+        }
+
+        n2e::symbol(env, "nil")
+    };
+
+    Fmsg_get_contents(env, nargs, args, data, TAG) {
+        let msg: &Msg = e2n::mut_ref(env, args, 0)?;
+        match msg.contents_ref() {
+            None => n2e::symbol(env, "nil"),
+            Some(&Contents::Text(ref t)) => n2e::string(env, t.as_bytes()),
+            Some(&Contents::Entries(ref es)) => n2e::string_list(env, es),
+        }
+    };
+
+    Fmsg_add_region(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        let region: &Region = e2n::mut_ref(env, args, 1)?;
+        msg.regions_mut().push(region.clone(/* TODO: remove clone() call */));
+        n2e::symbol(env, "t")
+    };
+
+    Fmsg_clear_regions(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        msg.regions_mut().clear();
+        n2e::symbol(env, "t")
+    };
+
+    Fmsg_get_region(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        let index: i64 = e2n::integer(env, args, 1)?;
+        if index < 0 {
+            // TODO: error: index must not be negative
+        }
+        let index: u64 = index as u64;
+        let num_regions: u64 = msg.regions_ref().len() as u64;
+        if index >= num_regions {
+            // TODO: error: index must be smaller than num_regions
+        }
+        let region: Region = msg.regions_ref()[index as usize];
+        n2e::boxed(env, region, emacs::destruct::<Region>)
+    };
+
+    Fmsg_count_regions(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        let num_regions: i64 = msg.regions_ref().len() as i64;
+        n2e::integer(env, num_regions)
+    };
+
+
+
+    Fmsg_get_language(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        n2e::boxed(env, msg.language_ref(), emacs::destruct::<Language>)
+    };
+
+    Fmsg_set_language(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        let language: &Language = e2n::mut_ref(env, args, 1)?;
+        *msg.language_mut() = Some(language.clone(/* TODO: remove the clone */));
+        n2e::symbol(env, "t")
+    };
+
+
+
+    Fmsg_get_ast(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        n2e::boxed(env, msg.ast_ref(), emacs::destruct::<Ast>)
+    };
+
+    Fmsg_set_ast(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        let ast: &Ast = e2n::mut_ref(env, args, 1)?;
+        *msg.ast_mut() = Some(ast.clone(/* TODO: remove the clone */));
+        n2e::symbol(env, "t")
+    };
+
+
+
 
     // Fmsg_(env, nargs, args, data, TAG) {
     //     let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
@@ -222,4 +469,4 @@ mod tests {
 }
 
 //  LocalWords:  uclient cclient Fcereal capn Fmsg Fcclient Ast capnp
-//  LocalWords:  ast
+//  LocalWords:  ast stringp listp
