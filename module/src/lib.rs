@@ -162,17 +162,17 @@ init_module! { (env) {
 
 
     /************************** Region **************************/
-    // emacs::register(env, "cereal/region-new", Fregion_new,      0..0,
-    //                 "()\n\n\
-    //                  Create a new Region object.")?;
+    emacs::register(env, "cereal/region-new", Fregion_new,      2..2,
+                    "(begin end)\n\n\
+                     Create a new Region object.")?;
 
-    // emacs::register(env, "cereal/region-get-begin", Fregion_get_begin,      1..1,
-    //                 "(region)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/region-get-begin", Fregion_get_begin,      1..1,
+                    "(region)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/region-get-end", Fregion_get_end,      1..1,
-    //                 "(region)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/region-get-end", Fregion_get_end,      1..1,
+                    "(region)\n\n\
+                     .")?;
 
 
     /************************** Language  **************************/
@@ -190,41 +190,41 @@ init_module! { (env) {
 
 
     /************************** Ast **************************/
-    // emacs::register(env, "cereal/ast-new", Fast_new,      1..1,
-    //                 "(name)\n\n\
-    //                  Create a new Ast object.")?;
+    emacs::register(env, "cereal/ast-new", Fast_new,      1..1,
+                    "(name)\n\n\
+                     Create a new Ast object.")?;
 
-    // emacs::register(env, "cereal/ast-get-name", Fast_get_name,      1..1,
-    //                 "(ast)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-get-name", Fast_get_name,      1..1,
+                    "(ast)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/ast-set-data", Fast_set_data,      2..2,
-    //                 "(ast data)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-set-data", Fast_set_data,      2..2,
+                    "(ast data)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/ast-get-data", Fast_get_data,      1..1,
-    //                 "(ast)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-get-data", Fast_get_data,      1..1,
+                    "(ast)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/ast-clear-data", Fast_clear_data,      1..1,
-    //                 "(ast)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-clear-data", Fast_clear_data,      1..1,
+                    "(ast)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/ast-add-child", Fast_add_child,      2..2,
-    //                 "(ast child)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-add-child", Fast_add_child,      2..2,
+                    "(ast child)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/ast-get-child", Fast_get_child,      2..2,
-    //                 "(ast index)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-get-child", Fast_get_child,      2..2,
+                    "(ast index)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/ast-clear-children", Fast_clear_children,      1..1,
-    //                 "(ast)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-clear-children", Fast_clear_children,      1..1,
+                    "(ast)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/ast-count-children", Fast_count_children,      1..1,
-    //                 "(ast)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/ast-count-children", Fast_count_children,      1..1,
+                    "(ast)\n\n\
+                     .")?;
 
 
 
@@ -450,11 +450,35 @@ emacs_subrs! {
     };
 
 
-
     /************************** Contents **************************/
 
 
     /************************** Region **************************/
+    Fregion_new(env, nargs, args, data, TAG) {
+        let begin: i64 = e2n::int_value(env, *args.offset(0))?;
+        let end: i64 = e2n::int_value(env, *args.offset(1))?;
+        if begin < 0 {
+            // TODO: error: begin must not be negative
+        }
+        if end < 0 {
+            // TODO: Error: end must not be negative
+        }
+        if end < begin {
+            // TODO: Error: end must not be larger than begin
+        }
+        let region = Region { begin: begin as u64, end: end as u64 };
+        n2e::boxed(env, region, emacs::destruct::<Region>)
+    };
+
+    Fregion_get_begin(env, nargs, args, data, TAG) {
+        let region: &Region = e2n::mut_ref(env, args, 0)?;
+        n2e::integer(env, region.begin as i64)
+    };
+
+    Fregion_get_end(env, nargs, args, data, TAG) {
+        let region: &Region = e2n::mut_ref(env, args, 0)?;
+        n2e::integer(env, region.end as i64)
+    };
 
 
     /************************** Language **************************/
@@ -476,8 +500,64 @@ emacs_subrs! {
     };
 
 
-
     /************************** Ast **************************/
+    Fast_new(env, nargs, args, data, TAG) {
+        let name: String = e2n::string(env, *args.offset(0))?;
+        n2e::boxed(env, Ast::new(name), emacs::destruct::<Ast>)
+    };
+
+    Fast_get_name(env, nargs, args, data, TAG) {
+        let ast: &Ast = e2n::mut_ref(env, args, 0)?;
+        n2e::string(env, ast.name_ref())
+    };
+
+    Fast_set_data(env, nargs, args, data, TAG) {
+        let ast: &mut Ast = e2n::mut_ref(env, args, 0)?;
+        *ast.data_mut() = e2n::string(env, *args.offset(1))?;
+        n2e::symbol(env, "t")
+    };
+
+    Fast_get_data(env, nargs, args, data, TAG) {
+        let ast: &Ast = e2n::mut_ref(env, args, 0)?;
+        n2e::string(env, ast.data_ref())
+    };
+
+    Fast_clear_data(env, nargs, args, data, TAG) {
+        let ast: &mut Ast = e2n::mut_ref(env, args, 0)?;
+        ast.data_mut().clear();
+        n2e::symbol(env, "t")
+    };
+
+    Fast_add_child(env, nargs, args, data, TAG) {
+        let ast: &mut Ast = e2n::mut_ref(env, args, 0)?;
+        let child: &Ast = e2n::mut_ref(env, args, 1)?;
+        let child: Ast = child.clone(/* TODO: remove the clone() call */);
+        ast.children_mut().push(child);
+        n2e::symbol(env, "t")
+    };
+
+    Fast_get_child(env, nargs, args, data, TAG) {
+        let ast: &Ast = e2n::mut_ref(env, args, 0)?;
+        let index: i64 = e2n::integer(env, args, 1)?;
+        if index < 0 {
+            // TODO: error
+        }
+        let child: Ast = ast.children_ref()[index as usize]
+            .clone(/* TODO: remove the clone() call */);
+        n2e::boxed(env, child, emacs::destruct::<Ast>)
+    };
+
+    Fast_clear_children(env, nargs, args, data, TAG) {
+        let ast: &mut Ast = e2n::mut_ref(env, args, 0)?;
+        ast.children_mut().clear();
+        n2e::symbol(env, "t")
+    };
+
+    Fast_count_children(env, nargs, args, data, TAG) {
+        let ast: &mut Ast = e2n::mut_ref(env, args, 0)?;
+        let num_children = ast.children_ref().len();
+        n2e::integer(env, num_children as i64)
+    };
 
     // Fast_(env, nargs, args, data, TAG) {
     //     let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
