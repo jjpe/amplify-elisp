@@ -124,41 +124,41 @@ init_module! { (env) {
 
 
     /************************** Contents **************************/
-    // emacs::register(env, "cereal/contents-new-text", Fcontents_new_text,      1..1,
-    //                 "(text)\n\n\
-    //                  Create a new Contents::Text object.")?;
+    emacs::register(env, "cereal/contents-new-text", Fcontents_new_text,      1..1,
+                    "(text)\n\n\
+                     Create a new Contents::Text object.")?;
 
-    // emacs::register(env, "cereal/contents-new-entries", Fcontents_new_entries,      0..0,
-    //                 "()\n\n\
-    //                  Create a new Contents::Entries object.")?;
+    emacs::register(env, "cereal/contents-new-entries", Fcontents_new_entries,      0..0,
+                    "()\n\n\
+                     Create a new Contents::Entries object.")?;
 
-    // emacs::register(env, "cereal/contents-is-text", Fcontents_is_text,      1..1,
-    //                 "(contents)\n\n\
-    //                  Return t iff. contents is Contents::Text, otherwise nil.")?;
+    emacs::register(env, "cereal/contents-is-text", Fcontents_is_text,      1..1,
+                    "(contents)\n\n\
+                     Return t iff. contents is Contents::Text, otherwise nil.")?;
 
-    // emacs::register(env, "cereal/contents-add-text", Fcontents_add_text,      2..2,
-    //                 "(contents text)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/contents-add-text", Fcontents_add_text,      2..2,
+                    "(contents text)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/contents-get-text", Fcontents_get_text,      1..1,
-    //                 "(contents)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/contents-get-text", Fcontents_get_text,      1..1,
+                    "(contents)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/contents-is-entries", Fcontents_is_entries,      1..1,
-    //                 "(contents)\n\n\
-    //                  Return t iff. contents is Contents::Entries, otherwise nil.")?;
+    emacs::register(env, "cereal/contents-is-entries", Fcontents_is_entries,      1..1,
+                    "(contents)\n\n\
+                     Return t iff. contents is Contents::Entries, otherwise nil.")?;
 
-    // emacs::register(env, "cereal/contents-add-entry", Fcontents_add_entry,      2..2,
-    //                 "(contents entry)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/contents-add-entry", Fcontents_add_entry,      2..2,
+                    "(contents entry)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/contents-get-entry", Fcontents_get_entry,      2..2,
-    //                 "(contents index)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/contents-get-entry", Fcontents_get_entry,      2..2,
+                    "(contents index)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/contents-count-entries", Fcontents_count_entries,      1..1,
-    //                 "(msg)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/contents-count-entries", Fcontents_count_entries,      1..1,
+                    "(msg)\n\n\
+                     .")?;
 
 
     /************************** Region **************************/
@@ -451,6 +451,91 @@ emacs_subrs! {
 
 
     /************************** Contents **************************/
+    Fcontents_new_text(env, nargs, args, data, TAG) {
+        let text: String = e2n::string(env, *args.offset(0))?;
+        n2e::boxed(env, Contents::Text(text), emacs::destruct::<Contents>)
+    };
+
+    Fcontents_new_entries(env, nargs, args, data, TAG) {
+        n2e::boxed(env, Contents::Entries(vec![]), emacs::destruct::<Contents>)
+    };
+
+    Fcontents_is_text(env, nargs, args, data, TAG) {
+        let contents: &Contents = e2n::mut_ref(env, args, 0)?;
+        match contents {
+            &Contents::Text(_) => n2e::symbol(env, "t"),
+            _ => n2e::symbol(env, "nil"),
+        }
+    };
+
+    Fcontents_add_text(env, nargs, args, data, TAG) {
+        let contents: &mut Contents = e2n::mut_ref(env, args, 0)?;
+        let string: String = e2n::string(env, *args.offset(1))?;
+        match contents {
+            &mut Contents::Text(ref mut text) => {
+                text.push_str(string.as_str());
+                n2e::symbol(env, "t")
+            },
+            _ => n2e::symbol(env, ":error::not-text"),
+        }
+    };
+
+    Fcontents_get_text(env, nargs, args, data, TAG) {
+        let contents: &Contents = e2n::mut_ref(env, args, 0)?;
+        match contents {
+            &Contents::Text(ref text) => n2e::string(env, text.as_str()),
+            _ => n2e::symbol(env, ":error::not-text"),
+        }
+    };
+
+    Fcontents_is_entries(env, nargs, args, data, TAG) {
+        let contents: &Contents = e2n::mut_ref(env, args, 0)?;
+        match contents {
+            &Contents::Entries(_) => n2e::symbol(env, "t"),
+            _ => n2e::symbol(env, "nil"),
+        }
+    };
+
+    Fcontents_add_entry(env, nargs, args, data, TAG) {
+        let contents: &mut Contents = e2n::mut_ref(env, args, 0)?;
+        let string: String = e2n::string(env, *args.offset(1))?;
+        match contents {
+            &mut Contents::Entries(ref mut entries) => {
+                entries.push(string);
+                n2e::symbol(env, "t")
+            },
+            _ => n2e::symbol(env, ":error::not-entries"),
+        }
+    };
+
+    Fcontents_get_entry(env, nargs, args, data, TAG) {
+        let contents: &Contents = e2n::mut_ref(env, args, 0)?;
+        let index: i64 = e2n::integer(env, args, 1)?;
+        if index < 0 {
+            // TODO: error
+        }
+        match contents {
+            &Contents::Entries(ref entries) => {
+                if index as usize >= entries.len() {
+                    // TODO: error
+                }
+                let entry: &String = entries.get(index as usize)
+                    .unwrap(/* TODO: None */);
+                n2e::string(env, entry.as_str())
+            },
+            _ => n2e::symbol(env, ":error::not-entries"),
+        }
+    };
+
+    Fcontents_count_entries(env, nargs, args, data, TAG) {
+        let contents: &Contents = e2n::mut_ref(env, args, 0)?;
+        match contents {
+            &Contents::Entries(ref entries) =>
+                n2e::integer(env, entries.len() as i64),
+            _ => n2e::symbol(env, ":error::not-entries"),
+        }
+    };
+
 
 
     /************************** Region **************************/
@@ -574,4 +659,4 @@ mod tests {
 }
 
 //  LocalWords:  uclient cclient Fcereal capn Fmsg Fcclient Ast capnp
-//  LocalWords:  ast stringp listp
+//  LocalWords:  ast stringp listp Fcontents
