@@ -1,5 +1,5 @@
 [package]
-name = "module"
+name = "libcereal_module"
 version = "0.1.0"
 authors = ["Joey Ezechiëls <joey.ezechiels@gmail.com>"]
 description = "Emacs module that provides Elisp bindings for libcereal."
