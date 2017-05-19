@@ -176,17 +176,17 @@ init_module! { (env) {
 
 
     /************************** Language  **************************/
-    // emacs::register(env, "cereal/language-new", Flanguage_new,      1..1,
-    //                 "(name)\n\n\
-    //                  Create a new Language object.")?;
+    emacs::register(env, "cereal/language-new", Flanguage_new,      1..1,
+                    "(name)\n\n\
+                     Create a new Language object.")?;
 
-    // emacs::register(env, "cereal/language-set-name", Flanguage_set_name,      2..2,
-    //                 "(language name)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/language-set-name", Flanguage_set_name,      2..2,
+                    "(language name)\n\n\
+                     .")?;
 
-    // emacs::register(env, "cereal/language-get-name", Flanguage_get_name,      1..1,
-    //                 "(language)\n\n\
-    //                  .")?;
+    emacs::register(env, "cereal/language-get-name", Flanguage_get_name,      1..1,
+                    "(language)\n\n\
+                     .")?;
 
 
     /************************** Ast **************************/
@@ -236,6 +236,7 @@ init_module! { (env) {
 
 
 emacs_subrs! {
+    /************************** UClient **************************/
     // Create a GC'd Elisp handle to a CClient value
     Fuclient_new(env, nargs, args, data, TAG) {
         let client = UClient::new().unwrap(/* TODO: ClientErr */);
@@ -283,7 +284,7 @@ emacs_subrs! {
     };
 
 
-
+    /************************** CClient **************************/
     Fcclient_send(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
         let msg: &Msg = e2n::mut_ref(env, args, 1)?;
@@ -299,7 +300,7 @@ emacs_subrs! {
     };
 
 
-
+    /************************** Msg **************************/
     Fmsg_new(env, nargs, args, data, TAG) {
         n2e::boxed(env, Msg::default(), emacs::destruct::<Msg>)
     };
@@ -424,7 +425,6 @@ emacs_subrs! {
     };
 
 
-
     Fmsg_get_language(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
         n2e::boxed(env, msg.language_ref(), emacs::destruct::<Language>)
@@ -436,8 +436,6 @@ emacs_subrs! {
         *msg.language_mut() = Some(language.clone(/* TODO: remove the clone */));
         n2e::symbol(env, "t")
     };
-
-
 
     Fmsg_get_ast(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
@@ -453,8 +451,35 @@ emacs_subrs! {
 
 
 
+    /************************** Contents **************************/
 
-    // Fmsg_(env, nargs, args, data, TAG) {
+
+    /************************** Region **************************/
+
+
+    /************************** Language **************************/
+    Flanguage_new(env, nargs, args, data, TAG) {
+        let string: String = e2n::string(env, *args.offset(0))?;
+        n2e::boxed(env, Language::from(string), emacs::destruct::<Language>)
+    };
+
+    Flanguage_get_name(env, nargs, args, data, TAG) {
+        let language: &Language = e2n::mut_ref(env, args, 0)?;
+        let language: &str = language.as_ref();
+        n2e::string(env, language)
+    };
+
+    Flanguage_set_name(env, nargs, args, data, TAG) {
+        let language: &mut Language = e2n::mut_ref(env, args, 0)?;
+        *language.as_mut() = e2n::string(env, *args.offset(1))?;
+        n2e::symbol(env, "t")
+    };
+
+
+
+    /************************** Ast **************************/
+
+    // Fast_(env, nargs, args, data, TAG) {
     //     let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
     // };
 
