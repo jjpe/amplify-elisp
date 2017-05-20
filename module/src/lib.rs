@@ -7,6 +7,7 @@ use emacs::elisp2native as e2n;
 use emacs::native2elisp as n2e;
 use libcereal::*;
 use libcereal::amplify::*;
+use std::ffi::CString;
 use std::os::raw;
 
 /// This states that the module is GPL-compliant.
@@ -128,7 +129,7 @@ init_module! { (env) {
                     "(text)\n\n\
                      Create a new Contents::Text object.")?;
 
-    emacs::register(env, "cereal/contents-new-entries", Fcontents_new_entries,      0..0,
+    emacs::register(env, "cereal/contents-new-entries", Fcontents_new_entries,      0..1000,
                     "()\n\n\
                      Create a new Contents::Entries object.")?;
 
@@ -307,7 +308,8 @@ emacs_subrs! {
 
     Fmsg_set_source(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        *msg.source_mut() = e2n::string(env, *args.offset(1))?;
+        let cstring: CString = e2n::cstring(env, *args.offset(1))?;
+        *msg.source_mut() = cstring.into_string().unwrap(/* TODO: IntoStringError */);
         n2e::symbol(env, "t")
     };
 
@@ -338,7 +340,8 @@ emacs_subrs! {
         if emacs::eq(env, origin, n2e::symbol(env, "nil")?)? {
             *msg.origin_mut() = None;
         } else {
-            *msg.origin_mut() = Some(e2n::string(env, origin)?);
+            let cstring: CString = e2n::cstring(env, origin)?;
+            *msg.origin_mut() = Some(cstring.into_string().unwrap(/* TODO: IntoStringError */));
         }
         n2e::symbol(env, "t")
     };
@@ -353,32 +356,13 @@ emacs_subrs! {
 
     Fmsg_set_contents(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        let contents: EmacsVal = *args.offset(1);
-        let (t,  nil) = (n2e::symbol(env, "t")?,  n2e::symbol(env, "nil")?);
-
-        if emacs::eq(env, contents, nil)? {
+        if emacs::eq(env, *args.offset(1), n2e::symbol(env, "nil")?)? {
             *msg.contents_mut() = None;
             return n2e::symbol(env, "t");
         }
-
-        let is_string: EmacsVal = emacs::call(env, "stringp", &mut [contents]);
-        if emacs::eq(env, is_string, t)? {
-            let string: String = e2n::string(env, contents)?;
-            *msg.contents_mut() = Some(Contents::Text(string));
-            return n2e::symbol(env, "t");
-        }
-
-        let is_list: EmacsVal = emacs::call(env, "listp", &mut [contents]);
-        if emacs::eq(env, is_list, t)? {
-            let mut vec: Vec<String> = vec![];
-            for emacs_string_val in e2n::list(env, contents)?.into_iter() {
-                vec.push(e2n::string(env, emacs_string_val)?);
-            }
-            *msg.contents_mut() = Some(Contents::Entries(vec));
-            return n2e::symbol(env, "t");
-        }
-
-        n2e::symbol(env, "nil")
+        let contents: &Contents = e2n::mut_ref(env, args, 1)?;
+        *msg.contents_mut() = Some(contents.clone(/* TODO: remove the clone */));
+        n2e::symbol(env, "t")
     };
 
     Fmsg_get_contents(env, nargs, args, data, TAG) {
@@ -457,7 +441,11 @@ emacs_subrs! {
     };
 
     Fcontents_new_entries(env, nargs, args, data, TAG) {
-        n2e::boxed(env, Contents::Entries(vec![]), emacs::destruct::<Contents>)
+        let mut strings: Vec<String> = vec![];
+        for idx in 0 .. nargs {
+            strings.push(e2n::string(env, *args.offset(idx))?);
+        }
+        n2e::boxed(env, Contents::Entries(strings), emacs::destruct::<Contents>)
     };
 
     Fcontents_is_text(env, nargs, args, data, TAG) {
