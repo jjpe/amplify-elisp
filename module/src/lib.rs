@@ -232,7 +232,7 @@ init_module! { (env) {
 
     const MODULE_NAME: &str = "libcereal-module";
     emacs::provide(env, MODULE_NAME.to_string());
-    message!(env, "[CEREAL] {} initialized", MODULE_NAME)
+    message!(env, "[cereal] {} initialized", MODULE_NAME)
 }}
 
 
