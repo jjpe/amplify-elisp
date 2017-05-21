@@ -30,6 +30,24 @@ explicitly included."
 (message "[cereal] Loaded liblibcereal_module.so")
 
 
+
+(cl-defun cereal/ast (name &key data children)
+  "Easily create a new AST with :data, :children, or both."
+  (let* ((ast (cereal/ast-new name)))
+    (when (stringp data)
+      (cereal/ast-set-data ast data))
+    (when (and data (not (stringp data)))
+      (cereal/ast-set-data ast (format "%s" data)))
+    (unless (listp children)
+      (error "Expected either nil or a list of child AST nodes"))
+    (dolist (child children)
+      (unless (eq (type-of child) 'user-ptr)
+        (error "Each child must be an AST node"))
+      (cereal/ast-add-child ast child))
+    ast))
+
+
+
 (provide 'libcereal)
 ;;; libcereal.el ends here
 
