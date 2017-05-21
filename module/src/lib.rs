@@ -339,10 +339,10 @@ emacs_subrs! {
         let origin: EmacsVal = *args.offset(1);
         if emacs::eq(env, origin, n2e::symbol(env, "nil")?)? {
             *msg.origin_mut() = None;
-        } else {
-            let cstring: CString = e2n::cstring(env, origin)?;
-            *msg.origin_mut() = Some(cstring.into_string().unwrap(/* TODO: IntoStringError */));
+            return n2e::symbol(env, "t");
         }
+        let cstring: CString = e2n::cstring(env, origin)?;
+        *msg.origin_mut() = Some(cstring.into_string().unwrap(/* TODO: IntoStringError */));
         n2e::symbol(env, "t")
     };
 
@@ -416,6 +416,10 @@ emacs_subrs! {
 
     Fmsg_set_language(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        if emacs::eq(env, *args.offset(1), n2e::symbol(env, "nil")?)? {
+            *msg.language_mut() = None;
+            return n2e::symbol(env, "t");
+        }
         let language: &Language = e2n::mut_ref(env, args, 1)?;
         *msg.language_mut() = Some(language.clone(/* TODO: remove the clone */));
         n2e::symbol(env, "t")
@@ -428,6 +432,10 @@ emacs_subrs! {
 
     Fmsg_set_ast(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        if emacs::eq(env, *args.offset(1), n2e::symbol(env, "nil")?)? {
+            *msg.ast_mut() = None;
+            return n2e::symbol(env, "t");
+        }
         let ast: &Ast = e2n::mut_ref(env, args, 1)?;
         *msg.ast_mut() = Some(ast.clone(/* TODO: remove the clone */));
         n2e::symbol(env, "t")
