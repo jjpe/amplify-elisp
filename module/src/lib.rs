@@ -5,6 +5,7 @@ extern crate libc;
 use emacs::{ConvResult, EmacsEnv, EmacsRT, EmacsVal};
 use emacs::elisp2native as e2n;
 use emacs::native2elisp as n2e;
+use libcereal::ZmqErr;
 use libcereal::*;
 use libcereal::amplify::*;
 use std::ffi::CString;
@@ -39,12 +40,28 @@ init_module! { (env) {
                     "(uclient address)\n\n\
                      Set the send address.")?;
 
+    emacs::register(env, "cereal/uclient-set-receive-timeout", Fuclient_set_rx_timeout,      2..2,
+                    "(uclient timeout-millis)\n\n\
+                     Set the receive timeout, in milliseconds.")?;
+
+    emacs::register(env, "cereal/uclient-set-send-timeout", Fuclient_set_tx_timeout,      2..2,
+                    "(uclient timeout-millis)\n\n\
+                     Set the send timeout, in milliseconds.")?;
+
     emacs::register(env, "cereal/uclient-connect", Fuclient_connect,      1..1,
                     "(uclient)\n\n\
                      Connect a uclient, and return a cclient instead.")?;
 
 
     /************************** CClient **************************/
+    emacs::register(env, "cereal/cclient-set-receive-timeout", Fcclient_set_rx_timeout,      2..2,
+                    "(cclient timeout-millis)\n\n\
+                     Set the receive timeout, in milliseconds.")?;
+
+    emacs::register(env, "cereal/cclient-set-send-timeout", Fcclient_set_tx_timeout,      2..2,
+                    "(cclient timeout-millis)\n\n\
+                     Set the send timeout, in milliseconds.")?;
+
     emacs::register(env, "cereal/cclient-send", Fcclient_send,      2..2,
                     "(cclient msg)\n\n\
                      .")?;
@@ -272,6 +289,28 @@ emacs_subrs! {
         n2e::symbol(env, "nil")
     };
 
+    Fuclient_set_rx_timeout(env, nargs, args, data, TAG) {
+        let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
+        let timeout = match e2n::integer(env, args, 1)? {
+            -1 => Timeout::Block,
+            0 => Timeout::None,
+            millis => Timeout::Millis(millis as usize),
+        };
+        uclient.set_receive_timeout(timeout);
+        n2e::symbol(env, "t")
+    };
+
+    Fuclient_set_tx_timeout(env, nargs, args, data, TAG) {
+        let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
+        let timeout = match e2n::integer(env, args, 1)? {
+            -1 => Timeout::Block,
+            0 => Timeout::None,
+            millis => Timeout::Millis(millis as usize),
+        };
+        uclient.set_send_timeout(timeout);
+        n2e::symbol(env, "t")
+    };
+
     Fuclient_connect(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
         let cclient: CClient = uclient
@@ -286,6 +325,28 @@ emacs_subrs! {
 
 
     /************************** CClient **************************/
+    Fcclient_set_rx_timeout(env, nargs, args, data, TAG) {
+        let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
+        let timeout = match e2n::integer(env, args, 1)? {
+            -1 => Timeout::Block,
+            0 => Timeout::None,
+            millis => Timeout::Millis(millis as usize),
+        };
+        cclient.set_receive_timeout(timeout).unwrap(/* TODO: ClientErr */);
+        n2e::symbol(env, "t")
+    };
+
+    Fcclient_set_tx_timeout(env, nargs, args, data, TAG) {
+        let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
+        let timeout = match e2n::integer(env, args, 1)? {
+            -1 => Timeout::Block,
+            0 => Timeout::None,
+            millis => Timeout::Millis(millis as usize),
+        };
+        cclient.set_send_timeout(timeout).unwrap(/* TODO: ClientErr */);
+        n2e::symbol(env, "t")
+    };
+
     Fcclient_send(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
         let msg: &Msg = e2n::mut_ref(env, args, 1)?;
