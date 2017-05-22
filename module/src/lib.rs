@@ -487,7 +487,10 @@ emacs_subrs! {
 
     Fmsg_get_language(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        n2e::boxed(env, msg.language_ref(), emacs::destruct::<Language>)
+        let lang_ref: Option<&Language> = msg.language_ref();
+        let language: Language = lang_ref.map(|lang: &Language| lang.clone())
+            .unwrap_or(Language::from(""));
+        n2e::boxed(env, language, emacs::destruct::<Language>)
     };
 
     Fmsg_set_language(env, nargs, args, data, TAG) {
@@ -503,7 +506,13 @@ emacs_subrs! {
 
     Fmsg_get_ast(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        n2e::boxed(env, msg.ast_ref(), emacs::destruct::<Ast>)
+        match msg.ast_ref() as Option<&Ast> {
+            None => n2e::symbol(env, "nil"),
+            Some(ast) => {
+                let ast: Ast = ast.clone(/* TODO: ability to take ownership */);
+                n2e::boxed(env, ast, emacs::destruct::<Ast>)
+            },
+        }
     };
 
     Fmsg_set_ast(env, nargs, args, data, TAG) {
