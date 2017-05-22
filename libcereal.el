@@ -46,7 +46,16 @@ explicitly included."
       (cereal/ast-add-child ast child))
     ast))
 
-
+(defun cereal/msg-get-regions (msg)
+  ""
+  (let ((num-regions (cereal/msg-count-regions msg)))
+    (cl-loop for region-index
+             from 0 to (1- num-regions)
+             collect
+             (let* ((region (cereal/msg-get-region msg region-index))
+                    (begin  (cereal/region-get-begin region))
+                    (end    (cereal/region-get-end region)))
+               `(:begin ,begin :end ,end)))))
 
 (provide 'libcereal)
 ;;; libcereal.el ends here
