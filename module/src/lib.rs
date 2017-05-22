@@ -309,7 +309,7 @@ emacs_subrs! {
     Fmsg_set_source(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
         let cstring: CString = e2n::cstring(env, *args.offset(1))?;
-        *msg.source_mut() = cstring.into_string().unwrap(/* TODO: IntoStringError */);
+        *msg.source_mut() = cstring.into_string()?;
         n2e::symbol(env, "t")
     };
 
@@ -342,7 +342,7 @@ emacs_subrs! {
             return n2e::symbol(env, "t");
         }
         let cstring: CString = e2n::cstring(env, origin)?;
-        *msg.origin_mut() = Some(cstring.into_string().unwrap(/* TODO: IntoStringError */));
+        *msg.origin_mut() = Some(cstring.into_string()?);
         n2e::symbol(env, "t")
     };
 
