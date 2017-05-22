@@ -47,15 +47,14 @@ explicitly included."
     ast))
 
 (defun cereal/msg-get-regions (msg)
-  ""
+  "Return all regions in MSG as a list of (:begin BEGIN :end END) plists."
   (let ((num-regions (cereal/msg-count-regions msg)))
     (cl-loop for region-index
              from 0 to (1- num-regions)
-             collect
-             (let* ((region (cereal/msg-get-region msg region-index))
-                    (begin  (cereal/region-get-begin region))
-                    (end    (cereal/region-get-end region)))
-               `(:begin ,begin :end ,end)))))
+             collect (let* ((region (cereal/msg-get-region msg region-index))
+                            (begin  (cereal/region-get-begin region))
+                            (end    (cereal/region-get-end region)))
+                       `(:begin ,begin :end ,end)))))
 
 (provide 'libcereal)
 ;;; libcereal.el ends here
