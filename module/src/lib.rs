@@ -10,6 +10,8 @@ use libcereal::*;
 use libcereal::amplify::*;
 use std::ffi::CString;
 use std::os::raw;
+use std::sync::mpsc;
+use std::thread;
 
 /// This states that the module is GPL-compliant.
 /// Emacs won't load the module if this symbol is undefined.
@@ -244,6 +246,17 @@ init_module! { (env) {
                     "(ast)\n\n\
                      .")?;
 
+
+
+    // TODO: set options for async CClient, e.g. receive address
+    emacs::register(env, "cereal/aclient-new", Faclient_new,      0..0,
+                    "()\n\n\
+                     Creates a CCLIENT in a private opaque thread.
+Returns an opaque pointer to an AsyncClient")?;
+
+    emacs::register(env, "cereal/aclient-receive", Faclient_receive,      1..1,
+                    "(async-client)\n\n\
+                     Try to receive a message.")?;
 
 
 
@@ -725,10 +738,107 @@ emacs_subrs! {
         n2e::integer(env, num_children as i64)
     };
 
+
+
+    Faclient_new(env, nargs, args, data, TAG) {
+        let aclient: AsyncClient = AsyncClient::new().unwrap(/* TODO: ClientErr */);
+        n2e::boxed(env, aclient, emacs::destruct::<AsyncClient>)
+    };
+
+    Faclient_receive(env, nargs, args, data, TAG) {
+        let aclient: &AsyncClient = e2n::mut_ref(env, args, 0)?;
+        match aclient.try_recv() {
+            Ok(msg) => n2e::boxed(env, msg, emacs::destruct::<Msg>),
+            Err(mpsc::TryRecvError::Empty) => n2e::symbol(env, "nil"),
+            Err(mpsc::TryRecvError::Disconnected) => {
+                // TODO: error
+                n2e::symbol(env, ":error::disconnected")
+            },
+        }
+    };
+
+
     // Fast_(env, nargs, args, data, TAG) {
     //     let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
     // };
 
+}
+
+
+struct AsyncClient {
+    join_handle: Option<thread::JoinHandle<()>>,
+    kill_tx: mpsc::SyncSender<()>,
+    msg_rx: mpsc::Receiver<Msg>,
+}
+
+impl AsyncClient {
+    pub fn new() -> ClientResult<Self> {
+        const CAPACITY: usize = 1024;
+        let (msg_tx, msg_rx) = mpsc::sync_channel::<Msg>(CAPACITY);
+        let (kill_tx, kill_rx) = mpsc::sync_channel::<()>(3);
+        let mut cclient: CClient = UClient::new()?
+            .connect()?;
+        let join_handle: thread::JoinHandle<()> = thread::spawn(move || {
+            cclient.set_receive_timeout(Timeout::Millis(1000))
+                .expect("[AsyncClient] setting receive timeout failed");
+            loop {
+                if kill_rx.try_recv().is_ok() {
+                    println!("[AsyncClient] stopped thread");
+                    break;
+                }
+
+                let mut msg = Msg::default();
+                match cclient.receive(&mut msg) {
+                    Ok(()) => match msg_tx.try_send(msg) {
+                        Ok(()) => {},
+                        Err(mpsc::TrySendError::Full(msg)) =>
+                            println!("[AsyncClient] Channel full, could not send {:#?}", msg),
+                        Err(mpsc::TrySendError::Disconnected(msg)) =>
+                            println!("[AsyncClient] Receiver disconnected, could not send {:#?}", msg),
+                    },
+                    Err(ClientErr::FailedToReceive(ZmqErr::EINTR))  => {/* Interrupt */},
+                    Err(ClientErr::FailedToReceive(ZmqErr::EAGAIN)) => {/* No msg at the moment */},
+                    Err(ClientErr::FailedToReceive(zmqerr)) =>
+                        panic!("[AsyncClient] ZmqErr: {:?}", zmqerr),
+                    Err(client_err) => // TODO:
+                        panic!("[AsyncClient] ClientErr: {:?}", client_err),
+                    // Err(client_err) => Err(client_err),
+                };
+            }
+        });
+
+        Ok(Self {
+            join_handle: Some(join_handle),
+            kill_tx: kill_tx,
+            msg_rx: msg_rx,
+        })
+    }
+
+    pub fn try_recv(&self) -> Result<Msg, mpsc::TryRecvError> {
+        self.msg_rx.try_recv()
+    }
+}
+
+impl Drop for AsyncClient {
+    fn drop(&mut self) {
+        // Drain all msgs in the queue
+        let mut msg = self.msg_rx.try_recv();
+        while msg.is_ok() {  msg = self.msg_rx.try_recv();  }
+
+        // Send the kill signal to the thread
+        if self.kill_tx.send(()).is_err() {
+            println!("[AsyncClient] Error sending kill signal to thread");
+        };
+
+        // Join the thread
+        if let Some(join_handle) = self.join_handle.take() {
+            match join_handle.join() {
+                Ok(()) =>   println!("[AsyncClient] join successful"),
+                Err(err) => println!("[AsyncClient] error joining: {:?}", err),
+            }
+        }
+
+    }
 }
 
 
@@ -740,4 +850,4 @@ mod tests {
 }
 
 //  LocalWords:  uclient cclient Fcereal capn Fmsg Fcclient Ast capnp
-//  LocalWords:  ast stringp listp Fcontents
+//  LocalWords:  ast stringp listp Fcontents aclient AsyncClient
