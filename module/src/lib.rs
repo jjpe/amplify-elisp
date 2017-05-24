@@ -443,19 +443,10 @@ emacs_subrs! {
         match cclient.receive(msg) {
             Ok(()) => n2e::symbol(env, "t"),
             Err(ClientErr::FailedToReceive(ZmqErr::EINTR)) =>
-            {
-                // println!("[Fcclient_receive] got Err(ClientErr::FailedToReceive(ZmqErr::EINTR))");
-                n2e::symbol(env, ":interrupted")}, // Interrupt
+                n2e::symbol(env, ":interrupted"), // Interrupt
             Err(ClientErr::FailedToReceive(ZmqErr::EAGAIN)) =>
-            {
-                // println!("[Fcclient_receive] got Err(ClientErr::FailedToReceive(ZmqErr::EAGAIN))");
-                n2e::symbol(env, ":no-msg")}, // No msg at the moment
-            Err(ClientErr::FailedToReceive(zmqerr)) => {
-                // println!("Before I crash, here's the zmq err: {:#?}", zmqerr);
-                panic!("zmqerr: {:?}", zmqerr)
-            }
+                n2e::symbol(env, ":no-msg"), // No msg at the moment
             client_err => panic!("{:?}", client_err), // TODO:
-            // Err(client_err) => Err(client_err),
         }
     };
 
