@@ -55,6 +55,16 @@ init_module! { (env) {
                     "(uclient timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
 
+    emacs::register(env, "cereal/uclient-set-receive-hwm",
+                    Fuclient_set_rx_hwm,  2..2,
+                    "(uclient capacity)\n\n\
+                     Set the receive high water mark capacity.")?;
+
+    emacs::register(env, "cereal/uclient-set-send-hwm",
+                    Fuclient_set_tx_hwm,  2..2,
+                    "(uclient capacity)\n\n\
+                     Set the send high water mark capacity.")?;
+
     emacs::register(env, "cereal/uclient-connect",
                     Fuclient_connect,  1..1,
                     "(uclient)\n\n\
@@ -71,6 +81,16 @@ init_module! { (env) {
                     Fcclient_set_tx_timeout,  2..2,
                     "(cclient timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
+
+    emacs::register(env, "cereal/cclient-set-receive-hwm",
+                    Fcclient_set_rx_hwm,  2..2,
+                    "(uclient capacity)\n\n\
+                     Set the receive high water mark capacity.")?;
+
+    emacs::register(env, "cereal/cclient-set-send-hwm",
+                    Fcclient_set_tx_hwm,  2..2,
+                    "(uclient capacity)\n\n\
+                     Set the send high water mark capacity.")?;
 
     emacs::register(env, "cereal/cclient-send",
                     Fcclient_send,  2..2,
@@ -354,6 +374,20 @@ emacs_subrs! {
         n2e::symbol(env, "t")
     };
 
+    Fuclient_set_rx_hwm(env, nargs, args, data, TAG) {
+        let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
+        let hwm = Hwm::from_number(e2n::integer(env, args, 1)? as usize);
+        uclient.set_receive_hwm(hwm);
+        n2e::symbol(env, "t")
+    };
+
+    Fuclient_set_tx_hwm(env, nargs, args, data, TAG) {
+        let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
+        let hwm = Hwm::from_number(e2n::integer(env, args, 1)? as usize);
+        uclient.set_send_hwm(hwm);
+        n2e::symbol(env, "t")
+    };
+
     Fuclient_connect(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
         let cclient: CClient = uclient
@@ -387,6 +421,20 @@ emacs_subrs! {
             millis => Timeout::Millis(millis as usize),
         };
         cclient.set_send_timeout(timeout).unwrap(/* TODO: ClientErr */);
+        n2e::symbol(env, "t")
+    };
+
+    Fcclient_set_rx_hwm(env, nargs, args, data, TAG) {
+        let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
+        let hwm = Hwm::from_number(e2n::integer(env, args, 1)? as usize);
+        cclient.set_receive_hwm(hwm).unwrap(/* TODO: ClientErr */);
+        n2e::symbol(env, "t")
+    };
+
+    Fcclient_set_tx_hwm(env, nargs, args, data, TAG) {
+        let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
+        let hwm = Hwm::from_number(e2n::integer(env, args, 1)? as usize);
+        cclient.set_send_hwm(hwm).unwrap(/* TODO: ClientErr */);
         n2e::symbol(env, "t")
     };
 
