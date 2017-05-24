@@ -453,11 +453,11 @@ emacs_subrs! {
             Err(ClientErr::FailedToReceive(ZmqErr::EINTR)) =>
             {
                 // println!("[Fcclient_receive] got Err(ClientErr::FailedToReceive(ZmqErr::EINTR))");
-                n2e::symbol(env, "nil")}, // Interrupt
+                n2e::symbol(env, ":interrupted")}, // Interrupt
             Err(ClientErr::FailedToReceive(ZmqErr::EAGAIN)) =>
             {
                 // println!("[Fcclient_receive] got Err(ClientErr::FailedToReceive(ZmqErr::EAGAIN))");
-                n2e::symbol(env, "nil")}, // No msg at the moment
+                n2e::symbol(env, ":no-msg")}, // No msg at the moment
             Err(ClientErr::FailedToReceive(zmqerr)) => {
                 // println!("Before I crash, here's the zmq err: {:#?}", zmqerr);
                 panic!("zmqerr: {:?}", zmqerr)
