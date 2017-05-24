@@ -35,13 +35,13 @@ init_module! { (env) {
                     "(uclient)\n\n\
                      Use JSON for serialization.")?;
 
-    emacs::register(env, "cereal/uclient-receive-address",
-                    Fuclient_rx_addr,  2..2,
+    emacs::register(env, "cereal/uclient-set-receive-address",
+                    Fuclient_set_rx_addr,  2..2,
                     "(uclient address)\n\n\
                      Set the receive address.")?;
 
-    emacs::register(env, "cereal/uclient-send-address",
-                    Fuclient_tx_addr,  2..2,
+    emacs::register(env, "cereal/uclient-set-send-address",
+                    Fuclient_set_tx_addr,  2..2,
                     "(uclient address)\n\n\
                      Set the send address.")?;
 
@@ -324,7 +324,7 @@ emacs_subrs! {
         n2e::symbol(env, "nil")
     };
 
-    Fuclient_rx_addr(env, nargs, args, data, TAG) {
+    Fuclient_set_rx_addr(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
         let addr = e2n::string(env, *args.offset(1))?;
         let addr = Url::parse(addr.as_str()).unwrap(/* TODO: url ParseError */);
@@ -332,7 +332,7 @@ emacs_subrs! {
         n2e::symbol(env, "nil")
     };
 
-    Fuclient_tx_addr(env, nargs, args, data, TAG) {
+    Fuclient_set_tx_addr(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
         let addr = e2n::string(env, *args.offset(1))?;
         let addr = Url::parse(addr.as_str()).unwrap(/* TODO: url ParseError */);
