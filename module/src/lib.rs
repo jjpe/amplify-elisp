@@ -404,22 +404,14 @@ emacs_subrs! {
     /************************** CClient **************************/
     Fcclient_set_rx_timeout(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
-        let timeout = match e2n::integer(env, args, 1)? {
-            -1 => Timeout::Block,
-            0 => Timeout::None,
-            millis => Timeout::Millis(millis as usize),
-        };
+        let timeout = Timeout::from_number(e2n::integer(env, args, 1)? as isize);
         cclient.set_receive_timeout(timeout).unwrap(/* TODO: ClientErr */);
         n2e::symbol(env, "t")
     };
 
     Fcclient_set_tx_timeout(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
-        let timeout = match e2n::integer(env, args, 1)? {
-            -1 => Timeout::Block,
-            0 => Timeout::None,
-            millis => Timeout::Millis(millis as usize),
-        };
+        let timeout = Timeout::from_number(e2n::integer(env, args, 1)? as isize);
         cclient.set_send_timeout(timeout).unwrap(/* TODO: ClientErr */);
         n2e::symbol(env, "t")
     };
