@@ -561,7 +561,8 @@ emacs_subrs! {
     Fmsg_get_language(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
         let lang_ref: Option<&Language> = msg.language_ref();
-        let language: Language = lang_ref.map(|lang: &Language| lang.clone())
+        let language: Language = lang_ref
+            .map(|lang: &Language| lang.clone(/* TODO: get rid of the clone */))
             .unwrap_or(Language::from(""));
         n2e::boxed(env, language, emacs::destruct::<Language>)
     };
@@ -728,8 +729,7 @@ emacs_subrs! {
 
     Flanguage_get_name(env, nargs, args, data, TAG) {
         let language: &Language = e2n::mut_ref(env, args, 0)?;
-        let language: &str = language.as_ref();
-        n2e::string(env, language)
+        n2e::string(env, language.as_ref())
     };
 
     Flanguage_set_name(env, nargs, args, data, TAG) {
@@ -793,7 +793,7 @@ emacs_subrs! {
     };
 
     Fast_count_children(env, nargs, args, data, TAG) {
-        let ast: &mut Ast = e2n::mut_ref(env, args, 0)?;
+        let ast: &Ast = e2n::mut_ref(env, args, 0)?;
         let num_children = ast.children_ref().len();
         n2e::integer(env, num_children as i64)
     };
