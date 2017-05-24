@@ -335,13 +335,13 @@ emacs_subrs! {
     Fuclient_serialize_using_capnp(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
         uclient.set_serialization_method(libcereal::Method::CapnProto);
-        n2e::symbol(env, "nil")
+        n2e::symbol(env, "t")
     };
 
     Fuclient_serialize_using_json(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
         uclient.set_serialization_method(libcereal::Method::Json);
-        n2e::symbol(env, "nil")
+        n2e::symbol(env, "t")
     };
 
     Fuclient_set_rx_addr(env, nargs, args, data, TAG) {
@@ -349,7 +349,7 @@ emacs_subrs! {
         let addr = e2n::string(env, *args.offset(1))?;
         let addr = Url::parse(addr.as_str()).unwrap(/* TODO: url ParseError */);
         uclient.set_receive_addr(addr);
-        n2e::symbol(env, "nil")
+        n2e::symbol(env, "t")
     };
 
     Fuclient_set_tx_addr(env, nargs, args, data, TAG) {
@@ -357,7 +357,7 @@ emacs_subrs! {
         let addr = e2n::string(env, *args.offset(1))?;
         let addr = Url::parse(addr.as_str()).unwrap(/* TODO: url ParseError */);
         uclient.set_send_addr(addr);
-        n2e::symbol(env, "nil")
+        n2e::symbol(env, "t")
     };
 
     Fuclient_set_rx_timeout(env, nargs, args, data, TAG) {
