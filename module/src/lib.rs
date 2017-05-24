@@ -22,227 +22,280 @@ pub static plugin_is_GPL_compatible: libc::c_int = 0;
 
 init_module! { (env) {
     /************************** UClient **************************/
-    emacs::register(env, "cereal/uclient-new", Fuclient_new,      0..0,
+    emacs::register(env, "cereal/uclient-new",
+                    Fuclient_new,  0..0,
                     "()\n\n\
                      Create a new unconnected client.")?;
 
-    emacs::register(env, "cereal/uclient-serialize-using-capnp", Fuclient_serialize_using_capnp,    1..1,
+    emacs::register(env, "cereal/uclient-serialize-using-capnp",
+                    Fuclient_serialize_using_capnp,  1..1,
                     "(uclient)\n\n\
                      Use Capn Proto for serialization.")?;
 
-    emacs::register(env, "cereal/uclient-serialize-using-json", Fuclient_serialize_using_json,      1..1,
+    emacs::register(env, "cereal/uclient-serialize-using-json",
+                    Fuclient_serialize_using_json,  1..1,
                     "(uclient)\n\n\
                      Use JSON for serialization.")?;
 
-    emacs::register(env, "cereal/uclient-receive-address", Fuclient_rx_addr,      2..2,
+    emacs::register(env, "cereal/uclient-receive-address",
+                    Fuclient_rx_addr,  2..2,
                     "(uclient address)\n\n\
                      Set the receive address.")?;
 
-    emacs::register(env, "cereal/uclient-send-address", Fuclient_tx_addr,      2..2,
+    emacs::register(env, "cereal/uclient-send-address",
+                    Fuclient_tx_addr,  2..2,
                     "(uclient address)\n\n\
                      Set the send address.")?;
 
-    emacs::register(env, "cereal/uclient-set-receive-timeout", Fuclient_set_rx_timeout,      2..2,
+    emacs::register(env, "cereal/uclient-set-receive-timeout",
+                    Fuclient_set_rx_timeout,  2..2,
                     "(uclient timeout-millis)\n\n\
                      Set the receive timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/uclient-set-send-timeout", Fuclient_set_tx_timeout,      2..2,
+    emacs::register(env, "cereal/uclient-set-send-timeout",
+                    Fuclient_set_tx_timeout,  2..2,
                     "(uclient timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/uclient-connect", Fuclient_connect,      1..1,
+    emacs::register(env, "cereal/uclient-connect",
+                    Fuclient_connect,  1..1,
                     "(uclient)\n\n\
                      Connect a uclient, and return a cclient instead.")?;
 
 
     /************************** CClient **************************/
-    emacs::register(env, "cereal/cclient-set-receive-timeout", Fcclient_set_rx_timeout,      2..2,
+    emacs::register(env, "cereal/cclient-set-receive-timeout",
+                    Fcclient_set_rx_timeout,  2..2,
                     "(cclient timeout-millis)\n\n\
                      Set the receive timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/cclient-set-send-timeout", Fcclient_set_tx_timeout,      2..2,
+    emacs::register(env, "cereal/cclient-set-send-timeout",
+                    Fcclient_set_tx_timeout,  2..2,
                     "(cclient timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/cclient-send", Fcclient_send,      2..2,
+    emacs::register(env, "cereal/cclient-send",
+                    Fcclient_send,  2..2,
                     "(cclient msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/cclient-receive", Fcclient_receive,      2..2,
+    emacs::register(env, "cereal/cclient-receive",
+                    Fcclient_receive,  2..2,
                     "(cclient msg)\n\n\
                      .")?;
 
 
     /************************** Msg **************************/
-    emacs::register(env, "cereal/msg-new", Fmsg_new,      0..0,
+    emacs::register(env, "cereal/msg-new",
+                    Fmsg_new,  0..0,
                     "()\n\n\
                      Create a new message.")?;
 
-    emacs::register(env, "cereal/msg-set-source", Fmsg_set_source,      2..2,
+    emacs::register(env, "cereal/msg-set-source",
+                    Fmsg_set_source,  2..2,
                     "(msg source)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-source", Fmsg_get_source,      1..1,
+    emacs::register(env, "cereal/msg-get-source",
+                    Fmsg_get_source,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-request-number", Fmsg_set_request_number,      2..2,
+    emacs::register(env, "cereal/msg-set-request-number",
+                    Fmsg_set_request_number,  2..2,
                     "(msg request-number)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-request-number", Fmsg_get_request_number,      1..1,
+    emacs::register(env, "cereal/msg-get-request-number",
+                    Fmsg_get_request_number,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-origin", Fmsg_set_origin,      2..2,
+    emacs::register(env, "cereal/msg-set-origin",
+                    Fmsg_set_origin,  2..2,
                     "(msg origin)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-origin", Fmsg_get_origin,      1..1,
+    emacs::register(env, "cereal/msg-get-origin",
+                    Fmsg_get_origin,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-contents", Fmsg_set_contents,      2..2,
+    emacs::register(env, "cereal/msg-set-contents",
+                    Fmsg_set_contents,  2..2,
                     "(msg contents)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-contents", Fmsg_get_contents,      1..1,
+    emacs::register(env, "cereal/msg-get-contents",
+                    Fmsg_get_contents,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-add-region", Fmsg_add_region,      2..2,
+    emacs::register(env, "cereal/msg-add-region",
+                    Fmsg_add_region,  2..2,
                     "(msg region)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-clear-regions", Fmsg_clear_regions,      1..1,
+    emacs::register(env, "cereal/msg-clear-regions",
+                    Fmsg_clear_regions,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-region", Fmsg_get_region,      2..2,
+    emacs::register(env, "cereal/msg-get-region",
+                    Fmsg_get_region,  2..2,
                     "(msg index)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-count-regions", Fmsg_count_regions,      1..1,
+    emacs::register(env, "cereal/msg-count-regions",
+                    Fmsg_count_regions,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-language", Fmsg_get_language,      1..1,
+    emacs::register(env, "cereal/msg-get-language",
+                    Fmsg_get_language,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-language", Fmsg_set_language,      2..2,
+    emacs::register(env, "cereal/msg-set-language",
+                    Fmsg_set_language,  2..2,
                     "(msg language)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-ast", Fmsg_set_ast,      2..2,
+    emacs::register(env, "cereal/msg-set-ast",
+                    Fmsg_set_ast,  2..2,
                     "(msg ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-ast", Fmsg_get_ast,      1..1,
+    emacs::register(env, "cereal/msg-get-ast",
+                    Fmsg_get_ast,  1..1,
                     "(msg)\n\n\
                      .")?;
 
 
     /************************** Contents **************************/
-    emacs::register(env, "cereal/contents-new-text", Fcontents_new_text,      1..1,
+    emacs::register(env, "cereal/contents-new-text",
+                    Fcontents_new_text,  1..1,
                     "(text)\n\n\
                      Create a new Contents::Text object.")?;
 
-    emacs::register(env, "cereal/contents-new-entries", Fcontents_new_entries,      0..1000,
+    emacs::register(env, "cereal/contents-new-entries",
+                    Fcontents_new_entries,  0..1000,
                     "()\n\n\
                      Create a new Contents::Entries object.")?;
 
-    emacs::register(env, "cereal/contents-is-text", Fcontents_is_text,      1..1,
+    emacs::register(env, "cereal/contents-is-text",
+                    Fcontents_is_text,  1..1,
                     "(contents)\n\n\
                      Return t iff. contents is Contents::Text, otherwise nil.")?;
 
-    emacs::register(env, "cereal/contents-add-text", Fcontents_add_text,      2..2,
+    emacs::register(env, "cereal/contents-add-text",
+                    Fcontents_add_text,  2..2,
                     "(contents text)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-get-text", Fcontents_get_text,      1..1,
+    emacs::register(env, "cereal/contents-get-text",
+                    Fcontents_get_text,  1..1,
                     "(contents)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-is-entries", Fcontents_is_entries,      1..1,
+    emacs::register(env, "cereal/contents-is-entries",
+                    Fcontents_is_entries,  1..1,
                     "(contents)\n\n\
                      Return t iff. contents is Contents::Entries, otherwise nil.")?;
 
-    emacs::register(env, "cereal/contents-add-entry", Fcontents_add_entry,      2..2,
+    emacs::register(env, "cereal/contents-add-entry",
+                    Fcontents_add_entry,  2..2,
                     "(contents entry)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-get-entry", Fcontents_get_entry,      2..2,
+    emacs::register(env, "cereal/contents-get-entry",
+                    Fcontents_get_entry,  2..2,
                     "(contents index)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-count-entries", Fcontents_count_entries,      1..1,
+    emacs::register(env, "cereal/contents-count-entries",
+                    Fcontents_count_entries,  1..1,
                     "(msg)\n\n\
                      .")?;
 
 
     /************************** Region **************************/
-    emacs::register(env, "cereal/region-new", Fregion_new,      2..2,
+    emacs::register(env, "cereal/region-new",
+                    Fregion_new,  2..2,
                     "(begin end)\n\n\
                      Create a new Region object.")?;
 
-    emacs::register(env, "cereal/region-get-begin", Fregion_get_begin,      1..1,
+    emacs::register(env, "cereal/region-get-begin",
+                    Fregion_get_begin,  1..1,
                     "(region)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/region-get-end", Fregion_get_end,      1..1,
+    emacs::register(env, "cereal/region-get-end",
+                    Fregion_get_end,  1..1,
                     "(region)\n\n\
                      .")?;
 
 
     /************************** Language  **************************/
-    emacs::register(env, "cereal/language-new", Flanguage_new,      1..1,
+    emacs::register(env, "cereal/language-new",
+                    Flanguage_new,  1..1,
                     "(name)\n\n\
                      Create a new Language object.")?;
 
-    emacs::register(env, "cereal/language-set-name", Flanguage_set_name,      2..2,
+    emacs::register(env, "cereal/language-set-name",
+                    Flanguage_set_name,  2..2,
                     "(language name)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/language-get-name", Flanguage_get_name,      1..1,
+    emacs::register(env, "cereal/language-get-name",
+                    Flanguage_get_name,  1..1,
                     "(language)\n\n\
                      .")?;
 
 
     /************************** Ast **************************/
-    emacs::register(env, "cereal/ast-new", Fast_new,      1..1,
+    emacs::register(env, "cereal/ast-new",
+                    Fast_new,  1..1,
                     "(name)\n\n\
                      Create a new Ast object.")?;
 
-    emacs::register(env, "cereal/ast-get-name", Fast_get_name,      1..1,
+    emacs::register(env, "cereal/ast-get-name",
+                    Fast_get_name,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-set-data", Fast_set_data,      2..2,
+    emacs::register(env, "cereal/ast-set-data",
+                    Fast_set_data,  2..2,
                     "(ast data)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-get-data", Fast_get_data,      1..1,
+    emacs::register(env, "cereal/ast-get-data",
+                    Fast_get_data,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-clear-data", Fast_clear_data,      1..1,
+    emacs::register(env, "cereal/ast-clear-data",
+                    Fast_clear_data,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-add-child", Fast_add_child,      2..2,
+    emacs::register(env, "cereal/ast-add-child",
+                    Fast_add_child,  2..2,
                     "(ast child)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-get-child", Fast_get_child,      2..2,
+    emacs::register(env, "cereal/ast-get-child",
+                    Fast_get_child,  2..2,
                     "(ast index)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-clear-children", Fast_clear_children,      1..1,
+    emacs::register(env, "cereal/ast-clear-children",
+                    Fast_clear_children,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-count-children", Fast_count_children,      1..1,
+    emacs::register(env, "cereal/ast-count-children",
+                    Fast_count_children,  1..1,
                     "(ast)\n\n\
                      .")?;
 
