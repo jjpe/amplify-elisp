@@ -526,7 +526,7 @@ emacs_subrs! {
     Fmsg_add_region(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
         let region: &Region = e2n::mut_ref(env, args, 1)?;
-        msg.regions_mut().push(region.clone(/* TODO: remove clone() call */));
+        msg.regions_mut().push(*region);
         n2e::symbol(env, "t")
     };
 
