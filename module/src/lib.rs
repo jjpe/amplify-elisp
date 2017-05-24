@@ -458,8 +458,7 @@ emacs_subrs! {
 
     Fmsg_set_source(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        let cstring: CString = e2n::cstring(env, *args.offset(1))?;
-        *msg.source_mut() = cstring.into_string()?;
+        *msg.source_mut() = e2n::string(env, *args.offset(1))?;
         n2e::symbol(env, "t")
     };
 
