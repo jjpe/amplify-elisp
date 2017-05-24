@@ -486,7 +486,7 @@ emacs_subrs! {
     Fmsg_set_origin(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
         let origin: EmacsVal = *args.offset(1);
-        if emacs::eq(env, origin, n2e::symbol(env, "nil")?)? {
+        if emacs::hlapi::is_nil(env, origin)? {
             *msg.origin_mut() = None;
             return n2e::symbol(env, "t");
         }
@@ -505,7 +505,7 @@ emacs_subrs! {
 
     Fmsg_set_contents(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        if emacs::eq(env, *args.offset(1), n2e::symbol(env, "nil")?)? {
+        if emacs::hlapi::is_nil(env, *args.offset(1))? {
             *msg.contents_mut() = None;
             return n2e::symbol(env, "t");
         }
@@ -568,7 +568,7 @@ emacs_subrs! {
 
     Fmsg_set_language(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        if emacs::eq(env, *args.offset(1), n2e::symbol(env, "nil")?)? {
+        if emacs::hlapi::is_nil(env, *args.offset(1))? {
             *msg.language_mut() = None;
             return n2e::symbol(env, "t");
         }
@@ -590,7 +590,7 @@ emacs_subrs! {
 
     Fmsg_set_ast(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        if emacs::eq(env, *args.offset(1), n2e::symbol(env, "nil")?)? {
+        if emacs::hlapi::is_nil(env, *args.offset(1))? {
             *msg.ast_mut() = None;
             return n2e::symbol(env, "t");
         }
