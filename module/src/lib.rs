@@ -219,13 +219,13 @@ init_module! { (env) {
                     "()\n\n\
                      Create a new message.")?;
 
-    emacs::register(env, "cereal/msg-set-source",
-                    Fmsg_set_source,  2..2,
-                    "(msg source)\n\n\
+    emacs::register(env, "cereal/msg-set-process",
+                    Fmsg_set_process,  2..2,
+                    "(msg process)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-source",
-                    Fmsg_get_source,  1..1,
+    emacs::register(env, "cereal/msg-get-process",
+                    Fmsg_get_process,  1..1,
                     "(msg)\n\n\
                      .")?;
 
@@ -236,6 +236,16 @@ init_module! { (env) {
 
     emacs::register(env, "cereal/msg-get-request-number",
                     Fmsg_get_request_number,  1..1,
+                    "(msg)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-set-kind",
+                    Fmsg_set_kind,  2..2,
+                    "(msg kind)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/msg-get-kind",
+                    Fmsg_get_kind,  1..1,
                     "(msg)\n\n\
                      .")?;
 
@@ -719,16 +729,16 @@ emacs_subrs! {
         n2e::boxed(env, Msg::default(), emacs::destruct::<Msg>)
     };
 
-    Fmsg_set_source(env, nargs, args, data, TAG) {
+    Fmsg_set_process(env, nargs, args, data, TAG) {
         let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
-        *msg.source_mut() = e2n::string(env, *args.offset(1))?;
+        *msg.process_mut() = e2n::string(env, *args.offset(1))?;
         n2e::symbol(env, "t")
     };
 
-    Fmsg_get_source(env, nargs, args, data, TAG) {
+    Fmsg_get_process(env, nargs, args, data, TAG) {
         let msg: &Msg = e2n::mut_ref(env, args, 0)?;
-        let source: &str = msg.source_ref();
-        n2e::string(env, source)
+        let process: &str = msg.process_ref();
+        n2e::string(env, process)
     };
 
     Fmsg_set_request_number(env, nargs, args, data, TAG) {
@@ -744,6 +754,18 @@ emacs_subrs! {
     Fmsg_get_request_number(env, nargs, args, data, TAG) {
         let msg: &Msg = e2n::mut_ref(env, args, 0)?;
         n2e::integer(env, msg.request_number() as i64)
+    };
+
+    Fmsg_set_kind(env, nargs, args, data, TAG) {
+        let msg: &mut Msg = e2n::mut_ref(env, args, 0)?;
+        *msg.kind_mut() = e2n::string(env, *args.offset(1))?;
+        n2e::symbol(env, "t")
+    };
+
+    Fmsg_get_kind(env, nargs, args, data, TAG) {
+        let msg: &Msg = e2n::mut_ref(env, args, 0)?;
+        let kind: &str = msg.kind_ref();
+        n2e::string(env, kind)
     };
 
     Fmsg_set_origin(env, nargs, args, data, TAG) {
