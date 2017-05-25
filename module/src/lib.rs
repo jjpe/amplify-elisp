@@ -19,6 +19,116 @@ pub static plugin_is_GPL_compatible: libc::c_int = 0;
 
 
 init_module! { (env) {
+    /************************** Ureporter **************************/
+    emacs::register(env, "cereal/ureporter-new",
+                    Fureporter_new,  0..0,
+                    "()\n\n\
+                     Create a new unconnected reporter.")?;
+
+    emacs::register(env, "cereal/ureporter-serialize-using-capnp",
+                    Fureporter_serialize_using_capnp,  1..1,
+                    "(ureporter)\n\n\
+                     Use Capn Proto for serialization.")?;
+
+    emacs::register(env, "cereal/ureporter-serialize-using-json",
+                    Fureporter_serialize_using_json,  1..1,
+                    "(ureporter)\n\n\
+                     Use JSON for serialization.")?;
+
+    emacs::register(env, "cereal/ureporter-set-send-address",
+                    Fureporter_set_tx_addr,  2..2,
+                    "(ureporter address)\n\n\
+                     Set the send address.")?;
+
+    emacs::register(env, "cereal/ureporter-set-send-timeout",
+                    Fureporter_set_tx_timeout,  2..2,
+                    "(ureporter timeout-millis)\n\n\
+                     Set the send timeout, in milliseconds.")?;
+
+    emacs::register(env, "cereal/ureporter-set-send-hwm",
+                    Fureporter_set_tx_hwm,  2..2,
+                    "(ureporter capacity)\n\n\
+                     Set the send high water mark capacity.")?;
+
+    emacs::register(env, "cereal/ureporter-connect",
+                    Fureporter_connect,  1..1,
+                    "(ureporter)\n\n\
+                     Consume the ureporter, and return a creporter instead.")?;
+
+    /************************** CReporter **************************/
+    emacs::register(env, "cereal/creporter-set-send-timeout",
+                    Fcreporter_set_tx_timeout,  2..2,
+                    "(creporter timeout-millis)\n\n\
+                     Set the send timeout, in milliseconds.")?;
+
+    emacs::register(env, "cereal/creporter-set-send-hwm",
+                    Fcreporter_set_tx_hwm,  2..2,
+                    "(uclient capacity)\n\n\
+                     Set the send high water mark capacity.")?;
+
+    emacs::register(env, "cereal/creporter-send",
+                    Fcreporter_send,  2..2,
+                    "(creporter report)\n\n\
+                     .")?;
+
+    /************************** Report **************************/
+    emacs::register(env, "cereal/report-new",
+                    Freport_new,  0..0,
+                    "()\n\n\
+                     Create a new message.")?;
+
+    emacs::register(env, "cereal/report-set-action",
+                    Freport_set_action,  2..2,
+                    "(report action)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-get-action",
+                    Freport_get_action,  1..1,
+                    "(report)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-set-process",
+                    Freport_set_process,  2..2,
+                    "(report process)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-get-process",
+                    Freport_get_process,  1..1,
+                    "(report)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-set-request-number",
+                    Freport_set_request_number,  2..2,
+                    "(report request-number)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-get-request-number",
+                    Freport_get_request_number,  1..1,
+                    "(report)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-set-duration-nanos",
+                    Freport_set_duration_nanos,  2..2,
+                    "(report duration-nanos)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-get-duration-nanos",
+                    Freport_get_duration_nanos,  1..1,
+                    "(report)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-set-command",
+                    Freport_set_command,  2..2,
+                    "(report command)\n\n\
+                     .")?;
+
+    emacs::register(env, "cereal/report-get-command",
+                    Freport_get_command,  1..1,
+                    "(report)\n\n\
+                     .")?;
+
+
+
     /************************** UClient **************************/
     emacs::register(env, "cereal/uclient-new",
                     Fuclient_new,  0..0,
@@ -325,6 +435,159 @@ init_module! { (env) {
 
 
 emacs_subrs! {
+    /************************** UReporter **************************/
+    Fureporter_new(env, nargs, args, data, TAG) {
+        let reporter = UReporter::new().unwrap(/* TODO: ReportErr */);
+        n2e::boxed(env, reporter, emacs::destruct::<UReporter>)
+    };
+
+    Fureporter_serialize_using_capnp(env, nargs, args, data, TAG) {
+        let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
+        ureporter.set_serialization_method(libcereal::Method::CapnProto);
+        n2e::symbol(env, "t")
+    };
+
+    Fureporter_serialize_using_json(env, nargs, args, data, TAG) {
+        let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
+        ureporter.set_serialization_method(libcereal::Method::Json);
+        n2e::symbol(env, "t")
+    };
+
+    Fureporter_set_tx_addr(env, nargs, args, data, TAG) {
+        let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
+        let addr = e2n::string(env, *args.offset(1))?;
+        let addr = Url::parse(addr.as_str()).unwrap(/* TODO: url ParseError */);
+        ureporter.set_send_addr(&addr);
+        n2e::symbol(env, "t")
+    };
+
+    Fureporter_set_tx_timeout(env, nargs, args, data, TAG) {
+        let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
+        let timeout = Timeout::from_number(e2n::integer(env, args, 1)? as isize);
+        ureporter.set_send_timeout(timeout);
+        n2e::symbol(env, "t")
+    };
+
+    Fureporter_set_tx_hwm(env, nargs, args, data, TAG) {
+        let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
+        let hwm = Hwm::from_number(e2n::integer(env, args, 1)? as usize);
+        ureporter.set_send_hwm(hwm);
+        n2e::symbol(env, "t")
+    };
+
+    Fureporter_connect(env, nargs, args, data, TAG) {
+        let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
+        let creporter: CReporter = ureporter
+            .clone(
+                /* TODO: The proper solution is being able to take ownership */
+                /*       of a pointer back from Elisp. Then this clone won't */
+                /*       be necessary anymore.                               */
+            )
+            .connect().unwrap(/* TODO: ReportErr */);
+        n2e::boxed(env, creporter, emacs::destruct::<CReporter>)
+    };
+
+
+    /************************** CReporter **************************/
+    Fcreporter_set_tx_timeout(env, nargs, args, data, TAG) {
+        let creporter: &mut CReporter = e2n::mut_ref(env, args, 0)?;
+        let timeout = Timeout::from_number(e2n::integer(env, args, 1)? as isize);
+        creporter.set_send_timeout(timeout).unwrap(/* TODO: ReportErr */);
+        n2e::symbol(env, "t")
+    };
+
+    Fcreporter_set_tx_hwm(env, nargs, args, data, TAG) {
+        let creporter: &mut CReporter = e2n::mut_ref(env, args, 0)?;
+        let hwm = Hwm::from_number(e2n::integer(env, args, 1)? as usize);
+        creporter.set_send_hwm(hwm).unwrap(/* TODO: ReportErr */);
+        n2e::symbol(env, "t")
+    };
+
+    Fcreporter_send(env, nargs, args, data, TAG) {
+        let creporter: &mut CReporter = e2n::mut_ref(env, args, 0)?;
+        let msg: &Msg = e2n::mut_ref(env, args, 1)?;
+        creporter.send(msg).unwrap(/* TODO: ReportErr */);
+        n2e::symbol(env, "nil")
+    };
+
+
+    /************************** Report **************************/
+    Freport_new(env, nargs, args, data, TAG) {
+        n2e::boxed(env, Report::default(), emacs::destruct::<Report>)
+    };
+
+    Freport_set_action(env, nargs, args, data, TAG) {
+        let report: &mut Report = e2n::mut_ref(env, args, 0)?;
+        *report.action_mut() = e2n::string(env, *args.offset(1))?;
+        n2e::symbol(env, "t")
+    };
+
+    Freport_get_action(env, nargs, args, data, TAG) {
+        let report: &Report = e2n::mut_ref(env, args, 0)?;
+        let action: &str = report.action_ref();
+        n2e::string(env, action)
+    };
+
+    Freport_set_process(env, nargs, args, data, TAG) {
+        let report: &mut Report = e2n::mut_ref(env, args, 0)?;
+        *report.process_mut() = e2n::string(env, *args.offset(1))?;
+        n2e::symbol(env, "t")
+    };
+
+    Freport_get_process(env, nargs, args, data, TAG) {
+        let report: &Report = e2n::mut_ref(env, args, 0)?;
+        let process: &str = report.process_ref();
+        n2e::string(env, process)
+    };
+
+    Freport_set_request_number(env, nargs, args, data, TAG) {
+        let report: &mut Report = e2n::mut_ref(env, args, 0)?;
+        let reqno: i64 = e2n::integer(env, args, 1)?;
+        if reqno < 0 {
+            // TODO: error: reqno >= 0 doesn't hold
+        }
+        *report.request_number_mut() = reqno as u64;
+        n2e::symbol(env, "t")
+    };
+
+    Freport_get_request_number(env, nargs, args, data, TAG) {
+        let report: &Report = e2n::mut_ref(env, args, 0)?;
+        n2e::integer(env, report.request_number() as i64)
+    };
+
+    Freport_set_duration_nanos(env, nargs, args, data, TAG) {
+        let report: &mut Report = e2n::mut_ref(env, args, 0)?;
+        let reqno: i64 = e2n::integer(env, args, 1)?;
+        if reqno < 0 {
+            // TODO: error: reqno >= 0 doesn't hold
+        }
+        *report.duration_nanos_mut() = reqno as u64;
+        n2e::symbol(env, "t")
+    };
+
+    Freport_get_duration_nanos(env, nargs, args, data, TAG) {
+        let report: &Report = e2n::mut_ref(env, args, 0)?;
+        n2e::integer(env, report.duration_nanos() as i64)
+    };
+
+    Freport_set_command(env, nargs, args, data, TAG) {
+        let report: &mut Report = e2n::mut_ref(env, args, 0)?;
+        let arg: EmacsVal = *args.offset(1);
+        *report.command_mut() =
+            if emacs::hlapi::is_nil(env, arg)? {  None  }
+            else {  Some(e2n::string(env, arg)?)  };
+        n2e::symbol(env, "t")
+    };
+
+    Freport_get_command(env, nargs, args, data, TAG) {
+        let report: &Report = e2n::mut_ref(env, args, 0)?;
+        match report.command_ref() {
+            Some(cmd) => n2e::string(env, cmd),
+            None => n2e::symbol(env, "nil")
+        }
+    };
+
+
     /************************** UClient **************************/
     // Create a GC'd Elisp handle to a CClient value
     Fuclient_new(env, nargs, args, data, TAG) {
@@ -815,3 +1078,4 @@ mod tests {
 
 //  LocalWords:  uclient cclient Fcereal capn Fmsg Fcclient Ast capnp
 //  LocalWords:  ast stringp listp Fcontents aclient AsyncClient
+//  LocalWords:  ureporter creporter
