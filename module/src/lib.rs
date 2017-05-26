@@ -321,6 +321,11 @@ init_module! { (env) {
                     "()\n\n\
                      Create a new Contents::Entries object.")?;
 
+    emacs::register(env, "cereal/contents-is-empty",
+                    Fcontents_is_empty,  1..1,
+                    "(contents)\n\n\
+                     Return t iff. contents is empty, otherwise nil.")?;
+
     emacs::register(env, "cereal/contents-is-text",
                     Fcontents_is_text,  1..1,
                     "(contents)\n\n\
@@ -898,6 +903,15 @@ emacs_subrs! {
             strings.push(e2n::string(env, *args.offset(idx))?);
         }
         n2e::boxed(env, Contents::Entries(strings), emacs::destruct::<Contents>)
+    };
+
+    Fcontents_is_empty(env, nargs, args, data, TAG) {
+        let contents: &Contents = e2n::mut_ref(env, args, 0)?;
+        if contents.is_empty() {
+            n2e::symbol(env, "t")
+        } else {
+            n2e::symbol(env, "nil")
+        }
     };
 
     Fcontents_is_text(env, nargs, args, data, TAG) {
