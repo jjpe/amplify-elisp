@@ -74,7 +74,7 @@ explicitly included."
     (unless (listp children)
       (error "Expected either nil or a list of child AST nodes"))
     (dolist (child children)
-      (unless (eq (type-of child) 'user-ptr)
+      (unless (user-ptrp child)
         (error "Each child must be an AST node"))
       (cereal/ast-add-child ast child))
     ast))
@@ -84,10 +84,10 @@ explicitly included."
   (let ((num-regions (cereal/msg-count-regions msg)))
     (cl-loop for region-index
              from 0 to (1- num-regions)
-             collect (let* ((region (cereal/msg-get-region msg region-index))
-                            (begin  (cereal/region-get-begin region))
-                            (end    (cereal/region-get-end region)))
-                       `(:begin ,begin :end ,end)))))
+             collect (let* ((region (cereal/msg-get-region msg region-index)))
+                       (list :begin (cereal/region-get-begin region)
+                             :end   (cereal/region-get-end region))))))
+
 
 (defun cereal/ast-get-children (ast)
   "Return the children of AST as a list."
