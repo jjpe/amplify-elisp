@@ -522,7 +522,7 @@ emacs_subrs! {
         let creporter: &mut CReporter = e2n::mut_ref(env, args, 0)?;
         let report: &Report = e2n::mut_ref(env, args, 1)?;
         creporter.send(report).unwrap(/* TODO: ReportErr */);
-        n2e::symbol(env, "nil")
+        n2e::symbol(env, "t")
     };
 
 
