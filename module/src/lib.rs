@@ -520,8 +520,8 @@ emacs_subrs! {
 
     Fcreporter_send(env, nargs, args, data, TAG) {
         let creporter: &mut CReporter = e2n::mut_ref(env, args, 0)?;
-        let msg: &Msg = e2n::mut_ref(env, args, 1)?;
-        creporter.send(msg).unwrap(/* TODO: ReportErr */);
+        let report: &Report = e2n::mut_ref(env, args, 1)?;
+        creporter.send(report).unwrap(/* TODO: ReportErr */);
         n2e::symbol(env, "nil")
     };
 
