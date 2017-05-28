@@ -26,9 +26,42 @@ explicitly included."
                             subpath-specs)))
     (apply #'concat cereal/root-directory spec-names)))
 
+
+(require 'cl-macs) ;; For early return functionality in cl-defun
 (require 'libcereal-module (cereal/subpath "module/target/liblibcereal_module.so"))
 (message "[cereal] Loaded liblibcereal_module.so")
 
+
+
+(cl-defun cereal/msg (process request-number kind
+                      &key origin contents regions language ast)
+  "Easily create a new Msg."
+  (let* ((msg (cereal/msg-new)))
+    (unless (stringp process)
+      (error "Expected a string for 'process'"))
+    (unless (integerp request-number)
+      (error "Expected an integer for 'request-number'"))
+    (unless (stringp kind)
+      (error "Expected a string for 'kind'"))
+    (unless (listp regions)
+      (error "Expected a list for 'regions'"))
+    (cereal/msg-set-process        msg process)
+    (cereal/msg-set-request-number msg request-number)
+    (cereal/msg-set-kind           msg kind)
+    (cereal/msg-set-origin         msg origin)
+    (cereal/msg-set-contents       msg contents)
+    (dolist (region regions)
+      (cond ((user-ptrp region)
+             (cereal/msg-add-region region))
+            ((listp region)
+             (let ((begin (plist-get region :begin))
+                   (end   (plist-get region :end)))
+               (->> (cereal/region-new begin end)
+                    (cereal/msg-add-region msg))))
+            (t (error "[cereal/msg] Invalid regions value: %s" regions))))
+    (cereal/msg-set-language       msg language)
+    (cereal/msg-set-ast            msg ast)
+    msg))
 
 
 (cl-defun cereal/ast (name &key data children)
@@ -56,7 +89,70 @@ explicitly included."
                             (end    (cereal/region-get-end region)))
                        `(:begin ,begin :end ,end)))))
 
+(defun cereal/ast-get-children (ast)
+  "Return the children of AST as a list."
+  (let ((num-children (cereal/ast-count-children ast)))
+    (loop for idx from 0 to (1- num-children)
+          collect (cereal/ast-get-child ast idx))))
+
+
+
+(cl-defun cereal/ast-plistify (ast)
+  ""
+  (unless ast
+    (return-from cereal/ast-plistify))
+  (let* ((name     (cereal/ast-get-name ast))
+         (data     (cereal/ast-get-data ast))
+         (children (cereal/ast-get-children ast))
+         (result   (list :name name)))
+    (when (and (stringp data) (> (length data) 0))
+      (setq result (merge 'list result `(:data ,data) 'eq)))
+    (when (and children (listp children))
+      (let ((-children (loop for child in children
+                             collect (cereal/ast-plistify child))))
+        (setq result (merge 'list  result  (list :children `,-children)  'eq))))
+    result))
+
+(cl-defun cereal/ast-stringify (ast &key (indent-level 0) (indent-token "  "))
+  "Return a string representation of an AST.  There are some keyword args:
+INDENT-LEVEL: The level of indentation
+INDENT-TOKEN: The indentation token.  Defaults to 2 spaces."
+  (let* ((parent-indentation (cereal/repeat-string indent-token indent-level))
+         (child-indentation (cereal/repeat-string indent-token (1+ indent-level)))
+         (name     (cereal/ast-get-name ast))
+         (data     (cereal/ast-get-data ast))
+         (children (cereal/ast-get-children ast))
+         (stuff ))
+    (->> (cond ((and  (> (length data) 0)  (not children))
+                (concat data ")"))
+               ((and  (> (length data) 0)  children  (listp children))
+                (concat "\n"  child-indentation  data   ",\n"
+                        (->> (loop for child in children
+                                   collect (cereal/ast-stringify child
+                                                                 :indent-level (1+ indent-level)
+                                                                 :indent-token indent-token)
+                                   collect ",\n")
+                             (apply #'concat))
+                        parent-indentation ")"))
+               ((and  (or (not data) (= (length data) 0))  children  (listp children))
+                (concat "\n"
+                        (->> (loop for child in children
+                                   collect (cereal/ast-stringify child
+                                                                 :indent-level (1+ indent-level)
+                                                                 :indent-token indent-token)
+                                   collect ",\n")
+                             (apply #'concat))
+                        parent-indentation ")"))
+               (t (error "[cereal/ast-stringify] Illegal state")))
+         (concat  parent-indentation  name  "("))))
+
+
+(defun cereal/repeat-string (string times)
+  "Return a new string that is equal to STRING repeated a number of TIMES."
+  (apply #'concat (loop for x from 1 to times
+                        collect string)))
+
 (provide 'libcereal)
 ;;; libcereal.el ends here
 
-;;  LocalWords:  liblibcereal
+;;  LocalWords:  liblibcereal ast stringify
