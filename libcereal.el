@@ -72,6 +72,19 @@ explicitly included."
     (cereal/msg-set-ast            msg ast)
     msg))
 
+(cl-defun cereal/msg-plistify (msg)
+  "Turn a msg object into a property list."
+  (list :process (cereal/msg-get-process msg)
+        :request-number (cereal/msg-get-request-number msg)
+        :kind (cereal/msg-get-kind msg)
+        :origin (cereal/msg-get-origin msg)
+        :contents (cereal/msg-get-contents msg)
+        :regions (cereal/msg-get-regions msg)
+        :language (->> (cereal/msg-get-language msg)
+                       (cereal/language-get-name))
+        :ast      (->> (cereal/msg-get-ast msg)
+                       (cereal/ast-plistify))))
+
 
 (cl-defun cereal/ast (name &key data children)
   "Easily create a new AST with :data, :children, or both."
