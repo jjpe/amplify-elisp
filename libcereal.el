@@ -115,16 +115,16 @@ explicitly included."
   ""
   (unless ast
     (return-from cereal/ast-plistify))
-  (let* ((name     (cereal/ast-get-name ast))
+  (let* ((name     (make-symbol (cereal/ast-get-name ast)))
          (data     (cereal/ast-get-data ast))
          (children (cereal/ast-get-children ast))
          (result   (list :name name)))
     (when (and (stringp data) (> (length data) 0))
       (setq result (merge 'list result `(:data ,data) 'eq)))
     (when (and children (listp children))
-      (let ((-children (loop for child in children
-                             collect (cereal/ast-plistify child))))
-        (setq result (merge 'list  result  (list :children `,-children)  'eq))))
+      (let ((kiddos (loop for child in children
+                          collect (cereal/ast-plistify child))))
+        (setq result (merge 'list  result  (list :children `,kiddos)  'eq))))
     result))
 
 (cl-defun cereal/ast-stringify (ast &key (indent-level 0) (indent-token "  "))
@@ -135,8 +135,7 @@ INDENT-TOKEN: The indentation token.  Defaults to 2 spaces."
          (child-indentation (cereal/repeat-string indent-token (1+ indent-level)))
          (name     (cereal/ast-get-name ast))
          (data     (cereal/ast-get-data ast))
-         (children (cereal/ast-get-children ast))
-         (stuff ))
+         (children (cereal/ast-get-children ast)))
     (->> (cond ((and  (> (length data) 0)  (not children))
                 (concat data ")"))
                ((and  (> (length data) 0)  children  (listp children))
