@@ -15,8 +15,8 @@ script:
 - cargo test --verbose
 - cargo build --verbose --release
 - cargo test --verbose --release
-- mv ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.so
-- mv ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/target/release/libamplify_module-${TRAVIS_TAG}-osx.so
+- mv ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.so
+- mv ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module-${TRAVIS_TAG}-osx.so
 - ls -ahl ${TRAVIS_BUILD_DIR}/module/target
 - ls -ahl ${TRAVIS_BUILD_DIR}/module/target/debug
 - ls -ahl ${TRAVIS_BUILD_DIR}/module/target/release
