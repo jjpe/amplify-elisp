@@ -7,20 +7,113 @@
 (defvar amplify-elisp/root-directory (file-name-directory load-file-name)
   "The amplify-elisp.el root directory.")
 
-(defun amplify-elisp/subpath (&rest subpath-specs)
+(defun amplify-elisp/path (&rest subpath-specs)
   "Calculate the absolute path out of of SUBPATH-SPECS, then return it.
 The subpath formed by concatenating the SUBPATH-SPECS will be relative
 to `amplify-elisp/root-directory'.  SUBPATH-SPECS must be some mix of strings and
-symbols.  So for example, (amplify-elisp/subpath \"foo/\" \"bar/\") will work, as
-will (amplify-elisp/subpath \"foo/\" 'bar/). Note that the path separators are
+symbols.  So for example, (amplify-elisp/path \"foo/\" \"bar/\") will work, as
+will (amplify-elisp/path \"foo/\" 'bar/). Note that the path separators are
 explicitly included."
   (let ((spec-names (mapcar (lambda (x) (if (symbolp x) (symbol-name x) x))
                             subpath-specs)))
     (apply #'concat amplify-elisp/root-directory spec-names)))
 
+(defun amplify-elisp/subproc-path (&rest subpath-specs)
+  "Return the path to a file located in one of the sub-processes."
+  (apply #'amplify-elisp/path "subproc/" subpath-specs))
+
+
+
+(defvar amplify-elisp/current-version "0.10.3"
+  "The current semantic version of the Emacs module for Amplify.")
+
+(defvar amplify-elisp/releases-dir
+  (amplify-elisp/subproc-path "module/")
+  "The directory in which all Amplify Emacs module releases are stored.")
+
+(defvar amplify-elisp/current-release-dir
+  (concat  amplify-elisp/releases-dir  amplify-elisp/current-version  "/")
+  "The directory in which the current Amplify Emacs module release is stored.
+This is based on the semantic version stored in `amplify-elisp/current-version'.")
+
+
+
+
+
+;; Internal utility functions
+(defun amplify-elisp/log (fmt-string &rest args)
+  "Log a message.
+FMT-STRING: A string that can contain string format arguments.
+ARGS: Any arguments to FMT-STRING."
+  (message "[amplify-elisp] %s" (format fmt-string args)))
+
+(defun amplify-elisp/download-resource (url file-name)
+  "Download a resource from URL to FILE-NAME."
+  (condition-case nil
+      (url-copy-file url file-name)
+    (error ; file-already-exists
+     (amplify-elisp/log "Using cached resource @ %s" file-name))))
+
+(defun amplify-elisp/query-latest-release ()
+  "Query GitHub for the latest Amplify release information."
+  (amplify-elisp/fetch-latest-release "amplify-elisp"))
+
+(cl-defun amplify-elisp/fetch-latest-release (project &key author)
+  "Query GitHub for the latest release information for a PROJECT by AUTHOR.
+AUTHOR is a keyword argument that can be omitted, and defaults to \"jjpe\".
+This function uses the GitHub REST API v3. "
+  (let* ((author (or author "jjpe"))
+         (url (format "https://api.github.com/repos/%s/%s/releases/latest"
+                      author project)))
+    (with-current-buffer (url-retrieve-synchronously url)
+      (->> (json-read)
+           (assoc 'tag_name)
+           cdr))))
+
+
+
+(defun amplify-elisp/module-download-release (semver)
+  "Download an Amplify module release with a specific SEMVER, e.g. \"0.9.6\".
+Specifically the following is downloaded:
+  * libamplify_module-SEMVER-osx.so, the main module library.
+  * libamplify_module-SEMVER-osx-dbg.so, a version
+    of libamplify_module-SEMVER-osx.so with debug symbols.
+Files that already exist won't be downloaded again."
+  (let* ((new-dir-path (concat amplify-elisp/releases-dir semver "/"))
+         (url-base "https://github.com/jjpe/amplify-elisp/releases/download/")
+         (module-url (concat url-base semver "/libamplify_module-" semver "-osx.so"))
+         (module-lib (concat new-dir-path "libamplify_module-" semver "-osx.so"))
+         (module-dbg-url (concat url-base semver "/libamplify_module-" semver "-osx-dbg.so"))
+         (module-dbg-lib (concat new-dir-path "libamplify_module-" semver "-osx-dbg.so")))
+    (unless (file-exists-p (amplify-elisp/subproc-path))
+      (make-directory (amplify-elisp/subproc-path)))
+    (unless (file-exists-p amplify-elisp/releases-dir)
+      (make-directory amplify-elisp/releases-dir))
+    (unless (file-exists-p new-dir-path)
+      (make-directory new-dir-path))
+    (amplify-elisp/download-resource module-url module-lib)
+    (amplify-elisp/download-resource module-dbg-url module-dbg-lib)
+    (set-file-modes module-lib #o755)
+    (set-file-modes module-dbg-lib #o755)))
+
+
+(defun amplify-elisp/switch-version (semver)
+  "Download and switch to Amplify SEMVER version e.g. \"0.10.3\".
+This explicitly does not stop or start any processes, that must be done separately."
+  ;; TODO: persistence of new SEMVER, especially when Amplify was upgraded.
+  (amplify-elisp/module-download-release semver)
+  (setq amplify-elisp/current-version      semver)
+  (setq amplify-elisp/current-release-dir
+        (concat  amplify-elisp/releases-dir  semver  "/")))
+
+
+
 
 (require 'cl-macs) ;; For early return functionality in cl-defun
-(require 'amplify-module (amplify-elisp/subpath "module/target/libamplify_module.so"))
+(amplify-elisp/switch-version amplify-elisp/current-version)
+(require 'amplify-module
+         (->> (concat "libamplify_module-" amplify-elisp/current-version "-osx-dbg.so")
+              (amplify-elisp/subproc-path "module/" amplify-elisp/current-version "/")))
 (message "[amplify-elisp] Loaded libamplify_module.so")
 
 
@@ -202,96 +295,6 @@ INDENT-TOKEN: The indentation token.  Defaults to 2 spaces."
 
 
 
-
-(defvar amplify-elisp/current-version "0.10.0"
-  "The current semantic version of the Emacs module for Amplify.")
-
-(defvar amplify-elisp/releases-dir
-  (amplify-elisp/subproc-path "module/")
-  "The directory in which all Amplify Emacs module releases are stored.")
-
-(defvar amplify-elisp/current-release-dir
-  (concat  amplify-elisp/releases-dir  amplify-elisp/current-version  "/")
-  "The directory in which the current Amplify Emacs module release is stored.
-This is based on the semantic version stored in `amplify-elisp/current-version'.")
-
-
-
-
-
-;; Internal utility functions
-(defun amplify-elisp/log (fmt-string &rest args)
-  "Log a message.
-FMT-STRING: A string that can contain string format arguments.
-ARGS: Any arguments to FMT-STRING."
-  (message "[amplify-elisp] %s" (format fmt-string args)))
-
-(defun amplify-elisp/download-resource (url file-name)
-  "Download a resource from URL to FILE-NAME."
-  (condition-case nil
-      (url-copy-file url file-name)
-    (error ; file-already-exists
-     (amplify-elisp/log "Using cached resource @ %s" file-name))))
-
-(defun amplify-elisp/extract-resource (archive-file-name target-dir)
-  "Extract an archive, located at ARCHIVE-FILE-NAME, to a TARGET-DIR.
-If the TARGET-DIR already exists, skip the extraction."
-  (if (file-exists-p target-dir)
-      (amplify-elisp/log "Using cached dir @ %s" target-dir)
-    (progn
-      (shell-command (concat "unzip " archive-file-name " -d " target-dir))
-      (amplify-elisp/log "Extracted dir @ %s" target-dir))))
-
-(defun amplify-elisp/query-latest-release ()
-  "Query GitHub for the latest Amplify release information."
-  (amplify-elisp/fetch-latest-release "amplify-elisp"))
-
-(cl-defun amplify-elisp/fetch-latest-release (project &key author)
-  "Query GitHub for the latest release information for a PROJECT by AUTHOR.
-AUTHOR is a keyword argument that can be omitted, and defaults to \"jjpe\".
-This function uses the GitHub REST API v3. "
-  (let* ((author (or author "jjpe"))
-         (url (format "https://api.github.com/repos/%s/%s/releases/latest"
-                      author project)))
-    (with-current-buffer (url-retrieve-synchronously url)
-      (->> (json-read)
-           (assoc 'tag_name)
-           cdr))))
-
-
-(defun amplify-elisp/module-download-release (semver)
-  "Download an Amplify module release with a specific SEMVER, e.g. \"0.9.6\".
-Specifically the following is downloaded:
-  * libamplify_module-SEMVER-osx.so, the main module library.
-  * libamplify_module-SEMVER-osx-dbg.so, a version
-    of libamplify_module-SEMVER-osx.so with debug symbols.
-Files that already exist won't be downloaded again."
-  (let* ((new-dir-path (concat amplify-elisp/releases-dir semver "/"))
-         (url-base "https://github.com/jjpe/amplify-elisp/releases/download/")
-         (module-url (concat url-base semver "/libamplify_module-" semver "-osx.so"))
-         (module-lib (concat new-dir-path "libamplify_module-" semver "-osx.so"))
-         (module-dbg-url (concat url-base semver "/libamplify_module-" semver "-osx-dbg.so"))
-         (module-dbg-lib (concat new-dir-path "libamplify_module-" semver "-osx-dbg.so")))
-    (unless (file-exists-p (amplify-elisp/subproc-path))
-      (make-directory (amplify-elisp/subproc-path)))
-    (unless (file-exists-p amplify-elisp/releases-dir)
-      (make-directory amplify-elisp/releases-dir))
-    (unless (file-exists-p new-dir-path)
-      (make-directory new-dir-path))
-    (amplify-elisp/download-resource module-url module-lib)
-    (amplify-elisp/download-resource module-dbg-url module-dbg-lib)
-    (set-file-modes module-lib #o755)
-    (set-file-modes omdule-dbg-lib #o755)))
-
-
-(defun amplify-elisp/switch-version (semver)
-  "Download and switch to Amplify SEMVER version e.g. \"0.10.0\".
-This explicitly does not stop or start any processes, that must be done separately."
-  ;; TODO: persistence of new SEMVER, especially when Amplify was upgraded.
-  (amplify-elisp/module-download-release semver)
-  (setq amplify-elisp/current-version      semver)
-  (setq amplify-elisp/current-release-dir
-        (concat  amplify-elisp/releases-dir  semver  "/")))
 
 
 
