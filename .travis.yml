@@ -1,0 +1,33 @@
+os:
+- osx
+osx_image: xcode6.4
+language: rust
+rust:
+- nightly
+before_install:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install capnp zeromq || brew upgrade
+  capnp zeromq; fi
+- echo "TravisCI build dir @ $TRAVIS_BUILD_DIR"
+- echo "Git tag @ $TRAVIS_TAG"
+script:
+- cd ./module/
+- cargo build --verbose
+- cargo test --verbose
+- cargo build --verbose --release
+- cargo test --verbose --release
+- mv ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.dylib
+- mv ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/target/release/libamplify_module-${TRAVIS_TAG}-osx.dylib
+- ls -ahl ${TRAVIS_BUILD_DIR}/module/target
+- ls -ahl ${TRAVIS_BUILD_DIR}/module/target/debug
+- ls -ahl ${TRAVIS_BUILD_DIR}/module/target/release
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: PYuqqwLObpIotip6m6LIcjEn8MgzPNoFQKaiXhm/J8C4lHFHijIZA9zLqwlV1XKRD1F+nB3WA9+RtVzFSW5I2hnDeou1FkdVc7d/3j+nG60Eu4fMjR/i17oF5MMUA2ZgrYusXzhL6LBN8Yg6+k4rbPte7MF94G6yRHD99wwFbK9Bqh+LIkGt7drL33p7zpR9R+lRQ+lgs0saX+ifVC22qvhEXvLgitpGGJ5AmOTsx6l9mbJZMBTzpzUo/GfVKM97NCw6V+iQJ8TOLl+sikkg/XkBhIQCOFJ5TEiU337Pw2dcd7OIKge78EYPzz9NvHbHR52bW+I36v/ZQxIkmIkQCZdEzX9sqHZDUsYR3E0rmrSDoRAl+KhNSD3OinOB3eeUMAU/Lm/Lx9bV6qdKinCnO9EaYCNarrlaSgo0ALbCEiWpX3Rjfu6ZBSB3F8JmHBI+WeDrpw92aoz3/YGXfeY4/l/La3okB6QEFw6sXve9mAANFNeA3FVdpm4Eud4havqKOPB0yHME69Bv7jpOSR0PbLdwD2xB9RUYjnDPW8/yBcpr2H250nx0tYdfa5T+mpc1H7E60cHfavY3d6xs83KzVCjiVGN9fO8d8DCd2YCuRpzyfPHpTIOCiiZKQ11WW7F4OMrElbiJ9eQ7yXB+JCcKxeGweJACizbM55o0cFdfQWE=
+  file:
+    - ${TRAVIS_BUILD_DIR}/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.dylib
+    - ${TRAVIS_BUILD_DIR}/target/release/libamplify_module-${TRAVIS_TAG}-osx.dylib
+  on:
+    repo: jjpe/amplify-elisp
+    tags: true
