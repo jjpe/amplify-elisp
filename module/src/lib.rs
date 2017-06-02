@@ -1,13 +1,12 @@
-extern crate libcereal;
+extern crate amplify;
 #[macro_use] extern crate emacs_module_bindings as emacs;
 extern crate libc;
 
 use emacs::{ConvResult, EmacsEnv, EmacsRT, EmacsVal};
 use emacs::elisp2native as e2n;
 use emacs::native2elisp as n2e;
-use libcereal::ZmqErr;
-use libcereal::*;
-use libcereal::amplify::*;
+use amplify::*;
+use amplify::amplify::*;
 use std::ffi::CString;
 use std::os::raw;
 
@@ -20,109 +19,109 @@ pub static plugin_is_GPL_compatible: libc::c_int = 0;
 
 init_module! { (env) {
     /************************** Ureporter **************************/
-    emacs::register(env, "cereal/ureporter-new",
+    emacs::register(env, "amplify-elisp/ureporter-new",
                     Fureporter_new,  0..0,
                     "()\n\n\
                      Create a new unconnected reporter.")?;
 
-    emacs::register(env, "cereal/ureporter-serialize-using-capnp",
+    emacs::register(env, "amplify-elisp/ureporter-serialize-using-capnp",
                     Fureporter_serialize_using_capnp,  1..1,
                     "(ureporter)\n\n\
                      Use Capn Proto for serialization.")?;
 
-    emacs::register(env, "cereal/ureporter-serialize-using-json",
+    emacs::register(env, "amplify-elisp/ureporter-serialize-using-json",
                     Fureporter_serialize_using_json,  1..1,
                     "(ureporter)\n\n\
                      Use JSON for serialization.")?;
 
-    emacs::register(env, "cereal/ureporter-set-send-address",
+    emacs::register(env, "amplify-elisp/ureporter-set-send-address",
                     Fureporter_set_tx_addr,  2..2,
                     "(ureporter address)\n\n\
                      Set the send address.")?;
 
-    emacs::register(env, "cereal/ureporter-set-send-timeout",
+    emacs::register(env, "amplify-elisp/ureporter-set-send-timeout",
                     Fureporter_set_tx_timeout,  2..2,
                     "(ureporter timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/ureporter-set-send-hwm",
+    emacs::register(env, "amplify-elisp/ureporter-set-send-hwm",
                     Fureporter_set_tx_hwm,  2..2,
                     "(ureporter capacity)\n\n\
                      Set the send high water mark capacity.")?;
 
-    emacs::register(env, "cereal/ureporter-connect",
+    emacs::register(env, "amplify-elisp/ureporter-connect",
                     Fureporter_connect,  1..1,
                     "(ureporter)\n\n\
                      Consume the ureporter, and return a creporter instead.")?;
 
     /************************** CReporter **************************/
-    emacs::register(env, "cereal/creporter-set-send-timeout",
+    emacs::register(env, "amplify-elisp/creporter-set-send-timeout",
                     Fcreporter_set_tx_timeout,  2..2,
                     "(creporter timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/creporter-set-send-hwm",
+    emacs::register(env, "amplify-elisp/creporter-set-send-hwm",
                     Fcreporter_set_tx_hwm,  2..2,
                     "(uclient capacity)\n\n\
                      Set the send high water mark capacity.")?;
 
-    emacs::register(env, "cereal/creporter-send",
+    emacs::register(env, "amplify-elisp/creporter-send",
                     Fcreporter_send,  2..2,
                     "(creporter report)\n\n\
                      .")?;
 
     /************************** Report **************************/
-    emacs::register(env, "cereal/report-new",
+    emacs::register(env, "amplify-elisp/report-new",
                     Freport_new,  0..0,
                     "()\n\n\
                      Create a new message.")?;
 
-    emacs::register(env, "cereal/report-set-action",
+    emacs::register(env, "amplify-elisp/report-set-action",
                     Freport_set_action,  2..2,
                     "(report action)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-get-action",
+    emacs::register(env, "amplify-elisp/report-get-action",
                     Freport_get_action,  1..1,
                     "(report)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-set-process",
+    emacs::register(env, "amplify-elisp/report-set-process",
                     Freport_set_process,  2..2,
                     "(report process)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-get-process",
+    emacs::register(env, "amplify-elisp/report-get-process",
                     Freport_get_process,  1..1,
                     "(report)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-set-request-number",
+    emacs::register(env, "amplify-elisp/report-set-request-number",
                     Freport_set_request_number,  2..2,
                     "(report request-number)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-get-request-number",
+    emacs::register(env, "amplify-elisp/report-get-request-number",
                     Freport_get_request_number,  1..1,
                     "(report)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-set-duration-nanos",
+    emacs::register(env, "amplify-elisp/report-set-duration-nanos",
                     Freport_set_duration_nanos,  2..2,
                     "(report duration-nanos)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-get-duration-nanos",
+    emacs::register(env, "amplify-elisp/report-get-duration-nanos",
                     Freport_get_duration_nanos,  1..1,
                     "(report)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-set-command",
+    emacs::register(env, "amplify-elisp/report-set-command",
                     Freport_set_command,  2..2,
                     "(report command)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/report-get-command",
+    emacs::register(env, "amplify-elisp/report-get-command",
                     Freport_get_command,  1..1,
                     "(report)\n\n\
                      .")?;
@@ -130,322 +129,322 @@ init_module! { (env) {
 
 
     /************************** UClient **************************/
-    emacs::register(env, "cereal/uclient-new",
+    emacs::register(env, "amplify-elisp/uclient-new",
                     Fuclient_new,  0..0,
                     "()\n\n\
                      Create a new unconnected client.")?;
 
-    emacs::register(env, "cereal/uclient-serialize-using-capnp",
+    emacs::register(env, "amplify-elisp/uclient-serialize-using-capnp",
                     Fuclient_serialize_using_capnp,  1..1,
                     "(uclient)\n\n\
                      Use Capn Proto for serialization.")?;
 
-    emacs::register(env, "cereal/uclient-serialize-using-json",
+    emacs::register(env, "amplify-elisp/uclient-serialize-using-json",
                     Fuclient_serialize_using_json,  1..1,
                     "(uclient)\n\n\
                      Use JSON for serialization.")?;
 
-    emacs::register(env, "cereal/uclient-set-receive-address",
+    emacs::register(env, "amplify-elisp/uclient-set-receive-address",
                     Fuclient_set_rx_addr,  2..2,
                     "(uclient address)\n\n\
                      Set the receive address.")?;
 
-    emacs::register(env, "cereal/uclient-set-send-address",
+    emacs::register(env, "amplify-elisp/uclient-set-send-address",
                     Fuclient_set_tx_addr,  2..2,
                     "(uclient address)\n\n\
                      Set the send address.")?;
 
-    emacs::register(env, "cereal/uclient-set-receive-timeout",
+    emacs::register(env, "amplify-elisp/uclient-set-receive-timeout",
                     Fuclient_set_rx_timeout,  2..2,
                     "(uclient timeout-millis)\n\n\
                      Set the receive timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/uclient-set-send-timeout",
+    emacs::register(env, "amplify-elisp/uclient-set-send-timeout",
                     Fuclient_set_tx_timeout,  2..2,
                     "(uclient timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/uclient-set-receive-hwm",
+    emacs::register(env, "amplify-elisp/uclient-set-receive-hwm",
                     Fuclient_set_rx_hwm,  2..2,
                     "(uclient capacity)\n\n\
                      Set the receive high water mark capacity.")?;
 
-    emacs::register(env, "cereal/uclient-set-send-hwm",
+    emacs::register(env, "amplify-elisp/uclient-set-send-hwm",
                     Fuclient_set_tx_hwm,  2..2,
                     "(uclient capacity)\n\n\
                      Set the send high water mark capacity.")?;
 
-    emacs::register(env, "cereal/uclient-connect",
+    emacs::register(env, "amplify-elisp/uclient-connect",
                     Fuclient_connect,  1..1,
                     "(uclient)\n\n\
                      Connect a uclient, and return a cclient instead.")?;
 
 
     /************************** CClient **************************/
-    emacs::register(env, "cereal/cclient-set-receive-timeout",
+    emacs::register(env, "amplify-elisp/cclient-set-receive-timeout",
                     Fcclient_set_rx_timeout,  2..2,
                     "(cclient timeout-millis)\n\n\
                      Set the receive timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/cclient-set-send-timeout",
+    emacs::register(env, "amplify-elisp/cclient-set-send-timeout",
                     Fcclient_set_tx_timeout,  2..2,
                     "(cclient timeout-millis)\n\n\
                      Set the send timeout, in milliseconds.")?;
 
-    emacs::register(env, "cereal/cclient-set-receive-hwm",
+    emacs::register(env, "amplify-elisp/cclient-set-receive-hwm",
                     Fcclient_set_rx_hwm,  2..2,
                     "(uclient capacity)\n\n\
                      Set the receive high water mark capacity.")?;
 
-    emacs::register(env, "cereal/cclient-set-send-hwm",
+    emacs::register(env, "amplify-elisp/cclient-set-send-hwm",
                     Fcclient_set_tx_hwm,  2..2,
                     "(uclient capacity)\n\n\
                      Set the send high water mark capacity.")?;
 
-    emacs::register(env, "cereal/cclient-send",
+    emacs::register(env, "amplify-elisp/cclient-send",
                     Fcclient_send,  2..2,
                     "(cclient msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/cclient-receive",
+    emacs::register(env, "amplify-elisp/cclient-receive",
                     Fcclient_receive,  2..2,
                     "(cclient msg)\n\n\
                      .")?;
 
 
     /************************** Msg **************************/
-    emacs::register(env, "cereal/msg-new",
+    emacs::register(env, "amplify-elisp/msg-new",
                     Fmsg_new,  0..0,
                     "()\n\n\
                      Create a new message.")?;
 
-    emacs::register(env, "cereal/msg-set-process",
+    emacs::register(env, "amplify-elisp/msg-set-process",
                     Fmsg_set_process,  2..2,
                     "(msg process)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-process",
+    emacs::register(env, "amplify-elisp/msg-get-process",
                     Fmsg_get_process,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-request-number",
+    emacs::register(env, "amplify-elisp/msg-set-request-number",
                     Fmsg_set_request_number,  2..2,
                     "(msg request-number)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-request-number",
+    emacs::register(env, "amplify-elisp/msg-get-request-number",
                     Fmsg_get_request_number,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-kind",
+    emacs::register(env, "amplify-elisp/msg-set-kind",
                     Fmsg_set_kind,  2..2,
                     "(msg kind)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-kind",
+    emacs::register(env, "amplify-elisp/msg-get-kind",
                     Fmsg_get_kind,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-origin",
+    emacs::register(env, "amplify-elisp/msg-set-origin",
                     Fmsg_set_origin,  2..2,
                     "(msg origin)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-origin",
+    emacs::register(env, "amplify-elisp/msg-get-origin",
                     Fmsg_get_origin,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-contents",
+    emacs::register(env, "amplify-elisp/msg-set-contents",
                     Fmsg_set_contents,  2..2,
                     "(msg contents)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-contents",
+    emacs::register(env, "amplify-elisp/msg-get-contents",
                     Fmsg_get_contents,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-add-region",
+    emacs::register(env, "amplify-elisp/msg-add-region",
                     Fmsg_add_region,  2..2,
                     "(msg region)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-clear-regions",
+    emacs::register(env, "amplify-elisp/msg-clear-regions",
                     Fmsg_clear_regions,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-region",
+    emacs::register(env, "amplify-elisp/msg-get-region",
                     Fmsg_get_region,  2..2,
                     "(msg index)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-count-regions",
+    emacs::register(env, "amplify-elisp/msg-count-regions",
                     Fmsg_count_regions,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-language",
+    emacs::register(env, "amplify-elisp/msg-get-language",
                     Fmsg_get_language,  1..1,
                     "(msg)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-language",
+    emacs::register(env, "amplify-elisp/msg-set-language",
                     Fmsg_set_language,  2..2,
                     "(msg language)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-set-ast",
+    emacs::register(env, "amplify-elisp/msg-set-ast",
                     Fmsg_set_ast,  2..2,
                     "(msg ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/msg-get-ast",
+    emacs::register(env, "amplify-elisp/msg-get-ast",
                     Fmsg_get_ast,  1..1,
                     "(msg)\n\n\
                      .")?;
 
 
     /************************** Contents **************************/
-    emacs::register(env, "cereal/contents-new-text",
+    emacs::register(env, "amplify-elisp/contents-new-text",
                     Fcontents_new_text,  1..1,
                     "(text)\n\n\
                      Create a new Contents::Text object.")?;
 
-    emacs::register(env, "cereal/contents-new-entries",
+    emacs::register(env, "amplify-elisp/contents-new-entries",
                     Fcontents_new_entries,  0..1000,
                     "()\n\n\
                      Create a new Contents::Entries object.")?;
 
-    emacs::register(env, "cereal/contents-is-empty",
+    emacs::register(env, "amplify-elisp/contents-is-empty",
                     Fcontents_is_empty,  1..1,
                     "(contents)\n\n\
                      Return t iff. contents is empty, otherwise nil.")?;
 
-    emacs::register(env, "cereal/contents-is-text",
+    emacs::register(env, "amplify-elisp/contents-is-text",
                     Fcontents_is_text,  1..1,
                     "(contents)\n\n\
                      Return t iff. contents is Contents::Text, otherwise nil.")?;
 
-    emacs::register(env, "cereal/contents-add-text",
+    emacs::register(env, "amplify-elisp/contents-add-text",
                     Fcontents_add_text,  2..2,
                     "(contents text)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-get-text",
+    emacs::register(env, "amplify-elisp/contents-get-text",
                     Fcontents_get_text,  1..1,
                     "(contents)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-is-entries",
+    emacs::register(env, "amplify-elisp/contents-is-entries",
                     Fcontents_is_entries,  1..1,
                     "(contents)\n\n\
                      Return t iff. contents is Contents::Entries, otherwise nil.")?;
 
-    emacs::register(env, "cereal/contents-add-entry",
+    emacs::register(env, "amplify-elisp/contents-add-entry",
                     Fcontents_add_entry,  2..2,
                     "(contents entry)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-get-entry",
+    emacs::register(env, "amplify-elisp/contents-get-entry",
                     Fcontents_get_entry,  2..2,
                     "(contents index)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/contents-count-entries",
+    emacs::register(env, "amplify-elisp/contents-count-entries",
                     Fcontents_count_entries,  1..1,
                     "(msg)\n\n\
                      .")?;
 
 
     /************************** Region **************************/
-    emacs::register(env, "cereal/region-new",
+    emacs::register(env, "amplify-elisp/region-new",
                     Fregion_new,  2..2,
                     "(begin end)\n\n\
                      Create a new Region object.")?;
 
-    emacs::register(env, "cereal/region-get-begin",
+    emacs::register(env, "amplify-elisp/region-get-begin",
                     Fregion_get_begin,  1..1,
                     "(region)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/region-get-end",
+    emacs::register(env, "amplify-elisp/region-get-end",
                     Fregion_get_end,  1..1,
                     "(region)\n\n\
                      .")?;
 
 
     /************************** Language  **************************/
-    emacs::register(env, "cereal/language-new",
+    emacs::register(env, "amplify-elisp/language-new",
                     Flanguage_new,  1..1,
                     "(name)\n\n\
                      Create a new Language object.")?;
 
-    emacs::register(env, "cereal/language-set-name",
+    emacs::register(env, "amplify-elisp/language-set-name",
                     Flanguage_set_name,  2..2,
                     "(language name)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/language-get-name",
+    emacs::register(env, "amplify-elisp/language-get-name",
                     Flanguage_get_name,  1..1,
                     "(language)\n\n\
                      .")?;
 
 
     /************************** Ast **************************/
-    emacs::register(env, "cereal/ast-new",
+    emacs::register(env, "amplify-elisp/ast-new",
                     Fast_new,  1..1,
                     "(name)\n\n\
                      Create a new Ast object.")?;
 
-    emacs::register(env, "cereal/ast-get-name",
+    emacs::register(env, "amplify-elisp/ast-get-name",
                     Fast_get_name,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-set-data",
+    emacs::register(env, "amplify-elisp/ast-set-data",
                     Fast_set_data,  2..2,
                     "(ast data)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-get-data",
+    emacs::register(env, "amplify-elisp/ast-get-data",
                     Fast_get_data,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-clear-data",
+    emacs::register(env, "amplify-elisp/ast-clear-data",
                     Fast_clear_data,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-add-child",
+    emacs::register(env, "amplify-elisp/ast-add-child",
                     Fast_add_child,  2..2,
                     "(ast child)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-get-child",
+    emacs::register(env, "amplify-elisp/ast-get-child",
                     Fast_get_child,  2..2,
                     "(ast index)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-clear-children",
+    emacs::register(env, "amplify-elisp/ast-clear-children",
                     Fast_clear_children,  1..1,
                     "(ast)\n\n\
                      .")?;
 
-    emacs::register(env, "cereal/ast-count-children",
+    emacs::register(env, "amplify-elisp/ast-count-children",
                     Fast_count_children,  1..1,
                     "(ast)\n\n\
                      .")?;
 
 
-    const MODULE_NAME: &str = "libcereal-module";
+    const MODULE_NAME: &str = "amplify-module";
     emacs::provide(env, MODULE_NAME.to_string());
-    message!(env, "[cereal] {} initialized", MODULE_NAME)
+    message!(env, "[amplify-elisp] {} initialized", MODULE_NAME)
 }}
 
 
@@ -458,13 +457,13 @@ emacs_subrs! {
 
     Fureporter_serialize_using_capnp(env, nargs, args, data, TAG) {
         let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
-        ureporter.set_serialization_method(libcereal::Method::CapnProto);
+        ureporter.set_serialization_method(amplify::Method::CapnProto);
         n2e::symbol(env, "t")
     };
 
     Fureporter_serialize_using_json(env, nargs, args, data, TAG) {
         let ureporter: &mut UReporter = e2n::mut_ref(env, args, 0)?;
-        ureporter.set_serialization_method(libcereal::Method::Json);
+        ureporter.set_serialization_method(amplify::Method::Json);
         n2e::symbol(env, "t")
     };
 
@@ -612,13 +611,13 @@ emacs_subrs! {
 
     Fuclient_serialize_using_capnp(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
-        uclient.set_serialization_method(libcereal::Method::CapnProto);
+        uclient.set_serialization_method(amplify::Method::CapnProto);
         n2e::symbol(env, "t")
     };
 
     Fuclient_serialize_using_json(env, nargs, args, data, TAG) {
         let uclient: &mut UClient = e2n::mut_ref(env, args, 0)?;
-        uclient.set_serialization_method(libcereal::Method::Json);
+        uclient.set_serialization_method(amplify::Method::Json);
         n2e::symbol(env, "t")
     };
 
@@ -1112,6 +1111,6 @@ mod tests {
     }
 }
 
-//  LocalWords:  uclient cclient Fcereal capn Fmsg Fcclient Ast capnp
+//  LocalWords:  uclient cclient capn Fmsg Fcclient Ast capnp
 //  LocalWords:  ast stringp listp Fcontents aclient AsyncClient
 //  LocalWords:  ureporter creporter

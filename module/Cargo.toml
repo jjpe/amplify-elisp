@@ -1,14 +1,14 @@
 [package]
-name = "libcereal_module"
-version = "0.9.0"
+name = "amplify_module"
+version = "0.10.0"
 authors = ["Joey Ezechiëls <joey.ezechiels@gmail.com>"]
-description = "Emacs module that provides Elisp bindings for libcereal."
+description = "Emacs module that provides Elisp bindings for Amplify."
 
 [dependencies]
 libc = "0.2"
 emacs_module_bindings = { git = "https://github.com/jjpe/emacs_module_bindings.git", tag = "v0.5.0" }
-cereal = { path = "../../libcereal" }
+amplify = { git = "https://github.com/jjpe/amplify" }
 
 [lib]
-name = "libcereal_module"
+name = "amplify_module"
 crate-type = ["cdylib"]
