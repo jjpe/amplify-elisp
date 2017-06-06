@@ -119,7 +119,7 @@ This explicitly does not stop or start any processes, that must be done separate
 
 
 (cl-defun amplify-elisp/msg (&key process request-number kind origin
-                           contents regions language ast)
+                                  contents regions language ast)
   "Easily create a new Msg.  "
   (let* ((msg (amplify-elisp/msg-new)))
     (unless (stringp process)
@@ -169,16 +169,17 @@ This explicitly does not stop or start any processes, that must be done separate
 
 (cl-defun amplify-elisp/msg-plistify (msg)
   "Turn a msg object into a property list."
-  (list :process (amplify-elisp/msg-get-process msg)
-        :request-number (amplify-elisp/msg-get-request-number msg)
-        :kind (amplify-elisp/msg-get-kind msg)
-        :origin (amplify-elisp/msg-get-origin msg)
-        :contents (amplify-elisp/msg-get-contents msg)
-        :regions (amplify-elisp/msg-get-regions msg)
-        :language (->> (amplify-elisp/msg-get-language msg)
-                       (amplify-elisp/language-get-name))
-        :ast      (->> (amplify-elisp/msg-get-ast msg)
-                       (amplify-elisp/ast-plistify))))
+  (when (user-ptrp msg)
+    (list :process (amplify-elisp/msg-get-process msg)
+          :request-number (amplify-elisp/msg-get-request-number msg)
+          :kind (amplify-elisp/msg-get-kind msg)
+          :origin (amplify-elisp/msg-get-origin msg)
+          :contents (amplify-elisp/msg-get-contents msg)
+          :regions (amplify-elisp/msg-get-regions msg)
+          :language (->> (amplify-elisp/msg-get-language msg)
+                         (amplify-elisp/language-get-name))
+          :ast      (->> (amplify-elisp/msg-get-ast msg)
+                         (amplify-elisp/ast-plistify)))))
 
 
 (cl-defun amplify-elisp/ast (name &key data children)
@@ -233,20 +234,20 @@ This explicitly does not stop or start any processes, that must be done separate
     report))
 
 (cl-defun amplify-elisp/ast-plistify (ast)
-  ""
-  (unless ast
-    (return-from amplify-elisp/ast-plistify))
-  (let* ((name     (make-symbol (amplify-elisp/ast-get-name ast)))
-         (data     (amplify-elisp/ast-get-data ast))
-         (children (amplify-elisp/ast-get-children ast))
-         (result   (list :name name)))
-    (when (and (stringp data) (> (length data) 0))
-      (setq result (merge 'list result `(:data ,data) 'eq)))
-    (when (and children (listp children))
-      (let ((kiddos (loop for child in children
-                          collect (amplify-elisp/ast-plistify child))))
-        (setq result (merge 'list  result  (list :children `,kiddos)  'eq))))
-    result))
+  "Make a plist out of an AST user ptr."
+  (when (user-ptrp ast)
+    (let* ((name     (make-symbol (amplify-elisp/ast-get-name ast)))
+           (data     (amplify-elisp/ast-get-data ast))
+           (children (amplify-elisp/ast-get-children ast))
+           (result   (list :name name)))
+      (when (and (stringp data) (> (length data) 0))
+        (setq result (plist-put result :data data)))
+      (when (and children (listp children))
+        (->> (loop for child in children
+                   collect (amplify-elisp/ast-plistify child))
+             (plist-put result :children)
+             (setq result)))
+      result)))
 
 (cl-defun amplify-elisp/ast-stringify (ast &key (indent-level 0) (indent-token "  "))
   "Return a string representation of an AST.  There are some keyword args:
