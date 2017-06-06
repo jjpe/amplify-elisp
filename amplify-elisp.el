@@ -114,7 +114,6 @@ This explicitly does not stop or start any processes, that must be done separate
 (require 'amplify-module
          (->> (concat "libamplify_module-" amplify-elisp/current-version "-osx-dbg.so")
               (amplify-elisp/subproc-path "module/" amplify-elisp/current-version "/")))
-(message "[amplify-elisp] Loaded libamplify_module.so")
 
 
 
