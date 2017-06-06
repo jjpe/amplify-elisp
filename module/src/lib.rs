@@ -710,7 +710,24 @@ emacs_subrs! {
     Fcclient_send(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
         let msg: &Msg = e2n::mut_ref(env, args, 1)?;
-        cclient.send(msg).unwrap(/* TODO: ClientErr */);
+        match cclient.send(msg) {
+            Ok(()) => return n2e::symbol(env, "t"),
+            Err(ClientErr::ZmqInterrupted) |
+            Err(ClientErr::FailedToSend(ZmqErr::EINTR)) |
+            Err(ClientErr::FailedToReceive(ZmqErr::EINTR)) => {
+                /* Interrupted, NOP */
+            },
+            Err(ClientErr::ZmqResourceTemporarilyUnavailable) |
+            Err(ClientErr::FailedToReceive(ZmqErr::EAGAIN)) |
+            Err(ClientErr::FailedToSend(ZmqErr::EAGAIN)) => {
+                /* No msg available, NOP */
+            },
+            Err(client_err) => {
+                println!("[Fcclient_send] Client error: {:?}", client_err);
+                message!(env, "[Fcclient_send] Client error: {:?}", client_err)?;
+                return n2e::symbol(env, ":reconnect");
+            },
+        }
         n2e::symbol(env, "nil")
     };
 
