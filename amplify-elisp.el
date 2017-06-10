@@ -238,7 +238,12 @@ This explicitly does not stop or start any processes, that must be done separate
     (let* ((name     (make-symbol (amplify-elisp/ast-get-name ast)))
            (data     (amplify-elisp/ast-get-data ast))
            (children (amplify-elisp/ast-get-children ast))
-           (result   (list :name name)))
+           (result   nil))
+      (unless (symbolp name)
+        (error "Expected a symbol value for name, got: %s" name))
+      ;; (unless (and (stringp name) (> (length name) 0))
+      ;;   (error "Expected a string value for name, got: %s" name))
+      (setq result (plist-put result :name name))
       (when (and (stringp data) (> (length data) 0))
         (setq result (plist-put result :data data)))
       (when (and children (listp children))
@@ -248,18 +253,28 @@ This explicitly does not stop or start any processes, that must be done separate
              (setq result)))
       result)))
 
-(cl-defun amplify-elisp/ast-stringify (ast &key (indent-level 0) (indent-token "  "))
-  "Return a string representation of an AST.  There are some keyword args:
+(cl-defun amplify-elisp/ast-stringify (ast &key (indent-level 0)
+                                                (indent-token "  "))
+  "Return a string representation of an AST user-ptr or an AST plist.
+These are the supported keyword args:
 INDENT-LEVEL: The level of indentation
 INDENT-TOKEN: The indentation token.  Defaults to 2 spaces."
   (let* ((parent-indentation (amplify-elisp/repeat-string indent-token indent-level))
          (child-indentation (amplify-elisp/repeat-string indent-token (1+ indent-level)))
-         (name     (amplify-elisp/ast-get-name ast))
-         (data     (amplify-elisp/ast-get-data ast))
-         (children (amplify-elisp/ast-get-children ast)))
+         (name     (cond ((user-ptrp ast)        (amplify-elisp/ast-get-name ast))
+                         ((and ast (listp ast))  (symbol-name (plist-get ast :name)))
+                         (t  (error "Unknown AST type \"%s\"" (type-of ast)))))
+         (data     (cond ((user-ptrp ast)        (amplify-elisp/ast-get-data ast))
+                         ((and ast (listp ast))  (plist-get ast :data))
+                         (t  (error "Unknown AST type \"%s\"" (type-of ast)))))
+         (children (cond ((user-ptrp ast)        (amplify-elisp/ast-get-children ast))
+                         ((and ast (listp ast))  (plist-get ast :children))
+                         (t  (error "Unknown AST type \"%s\"" (type-of ast))))))
     (->> (cond ((and  (> (length data) 0)  (not children))
+                ;; data & no children
                 (concat data ")"))
                ((and  (> (length data) 0)  children  (listp children))
+                ;; data & children
                 (concat "\n"  child-indentation  data   ",\n"
                         (->> (loop for child in children
                                    collect (amplify-elisp/ast-stringify child
@@ -268,7 +283,8 @@ INDENT-TOKEN: The indentation token.  Defaults to 2 spaces."
                                    collect ",\n")
                              (apply #'concat))
                         parent-indentation ")"))
-               ((and  (or (not data) (= (length data) 0))  children  (listp children))
+               ((and  (or (not data) (zerop (length data)))  children  (listp children))
+                ;; no data & children
                 (concat "\n"
                         (->> (loop for child in children
                                    collect (amplify-elisp/ast-stringify child
@@ -277,6 +293,9 @@ INDENT-TOKEN: The indentation token.  Defaults to 2 spaces."
                                    collect ",\n")
                              (apply #'concat))
                         parent-indentation ")"))
+               ((and  (or (not data) (zerop (length data)))  (not children))
+                ;; no data & no children
+                ")")
                (t (error "[amplify-elisp/ast-stringify] Illegal state")))
          (concat  parent-indentation  name  "("))))
 
