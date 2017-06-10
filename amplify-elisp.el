@@ -211,7 +211,7 @@ This explicitly does not stop or start any processes, that must be done separate
 
 
 (defun amplify-elisp/ast-get-children (ast)
-  "Return the children of AST as a list."
+  "Return the children of AST as a list of user-ptrs, each pointing to an Ast."
   (let ((num-children (amplify-elisp/ast-count-children ast)))
     (loop for idx from 0 to (1- num-children)
           collect (amplify-elisp/ast-get-child ast idx))))
