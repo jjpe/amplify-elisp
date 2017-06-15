@@ -20,7 +20,7 @@ script:
 - ls -ahl ${TRAVIS_BUILD_DIR}/module/target
 - ls -ahl ${TRAVIS_BUILD_DIR}/module/target/debug
 - ls -ahl ${TRAVIS_BUILD_DIR}/module/target/release
-- zip -r -j amplify-elisp-${TRAVIS_TAG}.zip  ${TRAVIS_BUILD_DIR}/LICENSE  ${TRAVIS_BUILD_DIR}/*.el  ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.so  ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module-${TRAVIS_TAG}-osx.so
+- zip -r -j ${TRAVIS_BUILD_DIR}/amplify-elisp-${TRAVIS_TAG}.zip  ${TRAVIS_BUILD_DIR}/LICENSE  ${TRAVIS_BUILD_DIR}/*.el  ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.so  ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module-${TRAVIS_TAG}-osx.so
 deploy:
   provider: releases
   skip_cleanup: true
