@@ -709,7 +709,7 @@ emacs_subrs! {
 
     Fcclient_send(env, nargs, args, data, TAG) {
         let cclient: &mut CClient = e2n::mut_ref(env, args, 0)?;
-        let msg: &Msg = e2n::mut_ref(env, args, 1)?;
+        let msg: &mut Msg = e2n::mut_ref(env, args, 1)?;
         match cclient.send(msg) {
             Ok(()) => n2e::symbol(env, "t"),
             Err(ClientErr::ZmqInterrupted) |
