@@ -134,22 +134,6 @@ explicitly included."
     (loop for idx from 0 to (1- num-children)
           collect (amplify-elisp/ast-get-child ast idx))))
 
-(cl-defun amplify-elisp/report (&key action process request-number
-                              duration-nanos command)
-  "Create a new report."
-  (let* ((report (amplify-elisp/report-new)))
-    (when (stringp action)
-      (amplify-elisp/report-set-action report action))
-    (when (stringp process)
-      (amplify-elisp/report-set-process report process))
-    (when (integerp request-number)
-      (amplify-elisp/report-set-request-number report request-number))
-    (when (integerp duration-nanos)
-      (amplify-elisp/report-set-duration-nanos report duration-nanos))
-    (when (stringp command)
-      (amplify-elisp/report-set-command report command))
-    report))
-
 (cl-defun amplify-elisp/ast-plistify (ast)
   "Make a plist out of an AST user ptr."
   (when (user-ptrp ast)
