@@ -24,7 +24,7 @@ explicitly included."
 
 
 
-(defvar amplify-elisp/current-version "0.12.3"
+(defvar amplify-elisp/current-version "0.13.0"
   "The current semantic version of the Amplify Emacs module.")
 
 
