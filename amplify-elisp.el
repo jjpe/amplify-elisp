@@ -24,14 +24,27 @@ explicitly included."
 
 
 
-(defvar amplify-elisp/current-version "0.13.3"
+(defvar amplify-elisp/current-version "0.13.4"
   "The current semantic version of the Amplify Emacs module.")
+
+(defvar amplify/detected-os
+  (pcase system-type
+    ('darwin       "osx")
+    ('gnu/linux    "linux")
+    ;; TODO: Windows support
+    (_ (error "Operating system '%s' is not supported" system-type)))
+  "A tag associated with the detected operating system.")
+
 
 
 
 (require 'cl-macs) ;; For early return functionality in cl-defun
-(require 'amplify-module
-         (amplify-elisp/path "libamplify_module-" amplify-elisp/current-version "-osx-dbg.so"))
+(require 'amplify-module (->> (concat "libamplify_module-"
+                                      amplify-elisp/current-version
+                                      "-"
+                                      amplify/detected-os
+                                      "-dbg.so")
+                              (amplify-elisp/path)))
 
 
 
