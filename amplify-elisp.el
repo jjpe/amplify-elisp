@@ -4,6 +4,13 @@
 
 ;;; Code:
 
+(defun amplify-elisp/download-resource (url file-name)
+  "Download a resource from URL to FILE-NAME."
+  (condition-case nil
+      (url-copy-file url file-name)
+    (error ; file-already-exists
+     (message "[amplify-elisp] using cached resource @ %s" file-name))))
+
 (defvar amplify-elisp/root-directory (file-name-directory load-file-name)
   "The amplify-elisp.el root directory.")
 
@@ -18,33 +25,38 @@ explicitly included."
                             subpath-specs)))
     (apply #'concat amplify-elisp/root-directory spec-names)))
 
-(defun amplify-elisp/subproc-path (&rest subpath-specs)
-  "Return the path to a file located in one of the sub-processes."
-  (apply #'amplify-elisp/path "subproc/" subpath-specs))
-
 
 
 (defvar amplify-elisp/current-version "0.14.0"
   "The current semantic version of the Amplify Emacs module.")
 
-(defvar amplify-elisp/detected-os
+(defvar amplify-elisp/current-os
   (pcase system-type
     ('darwin       "osx")
     ('gnu/linux    "linux")
     ;; TODO: Windows support
     (_ (error "Operating system '%s' is not supported" system-type)))
-  "A tag associated with the detected operating system.")
+  "A tag associated with the current operating system.")
 
 
+(defvar amplify-elisp/module-name
+  (concat "libamplify_module-"
+          amplify-elisp/current-version
+          "-"
+          amplify-elisp/current-os
+          "-dbg.so")
+  "The name of the module dynamic library.")
+
+
+;; Download the appropriate module dynamic library if it's not already present:
+(let* ((semver amplify-elisp/current-version)
+       (url-base "https://github.com/jjpe/amplify-elisp/releases/download")
+       (url (concat url-base "/" semver "/" amplify-elisp/module-name)))
+  (amplify-elisp/download-resource url amplify-elisp/module-name))
 
 
 (require 'cl-macs) ;; For early return functionality in cl-defun
-(require 'amplify-module (->> (concat "libamplify_module-"
-                                      amplify-elisp/current-version
-                                      "-"
-                                      amplify-elisp/detected-os
-                                      "-dbg.so")
-                              (amplify-elisp/path)))
+(require 'amplify-module (amplify-elisp/path amplify-elisp/module-name))
 
 
 
