@@ -4,13 +4,6 @@
 
 ;;; Code:
 
-(defun amplify-elisp/download-resource (url file-name)
-  "Download a resource from URL to FILE-NAME."
-  (condition-case nil
-      (url-copy-file url file-name)
-    (error ; file-already-exists
-     (message "[amplify-elisp] using cached resource @ %s" file-name))))
-
 (defvar amplify-elisp/root-directory (file-name-directory load-file-name)
   "The amplify-elisp.el root directory.")
 
@@ -26,8 +19,7 @@ explicitly included."
     (apply #'concat amplify-elisp/root-directory spec-names)))
 
 
-
-(defvar amplify-elisp/current-version "0.14.1"
+(defvar amplify-elisp/current-version "0.14.2"
   "The current semantic version of the Amplify Emacs module.")
 
 (defvar amplify-elisp/current-os
@@ -37,7 +29,6 @@ explicitly included."
     ;; TODO: Windows support
     (_ (error "Operating system '%s' is not supported" system-type)))
   "A tag associated with the current operating system.")
-
 
 (defvar amplify-elisp/module-name
   (concat "libamplify_module-"
@@ -49,10 +40,20 @@ explicitly included."
 
 
 ;; Download the appropriate module dynamic library if it's not already present:
+(cl-defun amplify-elisp/download-resource (url file-name)
+  "Download a resource from URL to FILE-NAME."
+  (let ((destination (amplify-elisp/path file-name)))
+    (when (file-exists-p destination)
+      (message "[amplify-elisp] using cached resource @ %s" file-name)
+      (return-from amplify-elisp/download-resource))
+    (url-copy-file url destination)))
+
 (let* ((semver amplify-elisp/current-version)
        (url-base "https://github.com/jjpe/amplify-elisp/releases/download")
        (url (concat url-base "/" semver "/" amplify-elisp/module-name)))
   (amplify-elisp/download-resource url amplify-elisp/module-name))
+
+
 
 
 (require 'cl-macs) ;; For early return functionality in cl-defun
