@@ -27,7 +27,7 @@ explicitly included."
 (defvar amplify-elisp/current-version "0.13.5"
   "The current semantic version of the Amplify Emacs module.")
 
-(defvar amplify/detected-os
+(defvar amplify-elisp/detected-os
   (pcase system-type
     ('darwin       "osx")
     ('gnu/linux    "linux")
@@ -42,7 +42,7 @@ explicitly included."
 (require 'amplify-module (->> (concat "libamplify_module-"
                                       amplify-elisp/current-version
                                       "-"
-                                      amplify/detected-os
+                                      amplify-elisp/detected-os
                                       "-dbg.so")
                               (amplify-elisp/path)))
 
