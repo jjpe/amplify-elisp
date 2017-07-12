@@ -68,11 +68,13 @@ If it already exists, it won't be downloaded again."
   (let* ((semver (depend/query-github-release "jjpe" "amplify-elisp"))
          (module-dir-path (amplify-elisp/subproc-path "libamplify_module/" semver))
          (os amplify-elisp/os)
-         (url-base "https://github.com/jjpe/amplify-elisp/releases/download")
-         (url (concat url-base "/" semver "/libamplify_module-" semver "-" os))
-         (bin (concat module-dir-path     "/libamplify_module-" semver "-" os ".so"))
-         (dbg-url (concat url-base "/" semver "/libamplify_module-" semver "-" os "-dbg"))
-         (dbg-bin (concat module-dir-path     "/libamplify_module-" semver "-" os "-dbg.so")))
+         (url-base (format "https://github.com/jjpe/%s/releases/download/%s"
+                           "amplify-elisp"
+                           semver))
+         (url (concat url-base        "/libamplify_module-" semver "-" os ".so"))
+         (bin (concat module-dir-path "/libamplify_module-" semver "-" os ".so"))
+         (dbg-url (concat url-base        "/libamplify_module-" semver "-" os "-dbg"))
+         (dbg-bin (concat module-dir-path "/libamplify_module-" semver "-" os "-dbg.so")))
     (unless (file-exists-p (amplify-elisp/subproc-path))
       (make-directory (amplify-elisp/subproc-path)))
     (unless (file-exists-p amplify-elisp/amplify-module-root-dir)
