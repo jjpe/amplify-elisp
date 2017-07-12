@@ -73,7 +73,7 @@ If it already exists, it won't be downloaded again."
                            semver))
          (url (concat url-base        "/libamplify_module-" semver "-" os ".so"))
          (bin (concat module-dir-path "/libamplify_module-" semver "-" os ".so"))
-         (dbg-url (concat url-base        "/libamplify_module-" semver "-" os "-dbg"))
+         (dbg-url (concat url-base        "/libamplify_module-" semver "-" os "-dbg.so"))
          (dbg-bin (concat module-dir-path "/libamplify_module-" semver "-" os "-dbg.so")))
     (unless (file-exists-p (amplify-elisp/subproc-path))
       (make-directory (amplify-elisp/subproc-path)))
