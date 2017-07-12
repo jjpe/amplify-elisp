@@ -6,10 +6,9 @@ rust:
 - nightly
 branches:
   except:
-    - master
+  - master
 before_install:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install capnp zeromq || brew upgrade
-  capnp zeromq; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install capnp zeromq || brew upgrade capnp zeromq; fi
 - echo "TravisCI build dir @ $TRAVIS_BUILD_DIR"
 - echo "Git tag @ $TRAVIS_TAG"
 script:
@@ -20,13 +19,14 @@ script:
 - cargo test --verbose --release
 # - cp ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module.dylib   ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.so
 # - cp ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module-${TRAVIS_TAG}-osx.so
-- cp ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module.dylib   ${TRAVIS_BUILD_DIR}/libamplify_module-${TRAVIS_TAG}-osx-dbg.so
-- cp ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module.dylib ${TRAVIS_BUILD_DIR}/libamplify_module-${TRAVIS_TAG}-osx.so
-- ls -ahl ${TRAVIS_BUILD_DIR}/module/target
-- ls -ahl ${TRAVIS_BUILD_DIR}/module/target/debug
-- ls -ahl ${TRAVIS_BUILD_DIR}/module/target/release
+- cd ${TRAVIS_BUILD_DIR}
+- cp ./module/target/debug/libamplify_module.dylib   ./libamplify_module-${TRAVIS_TAG}-osx-dbg.so
+- cp ./module/target/release/libamplify_module.dylib ./libamplify_module-${TRAVIS_TAG}-osx.so
+- ls -ahl ./module/target
+- ls -ahl ./module/target/debug
+- ls -ahl ./module/target/release
 # - zip -r -j ${TRAVIS_BUILD_DIR}/amplify-elisp-${TRAVIS_TAG}.zip  ${TRAVIS_BUILD_DIR}/LICENSE  ${TRAVIS_BUILD_DIR}/*.el  ${TRAVIS_BUILD_DIR}/module/target/debug/libamplify_module-${TRAVIS_TAG}-osx-dbg.so  ${TRAVIS_BUILD_DIR}/module/target/release/libamplify_module-${TRAVIS_TAG}-osx.so
-- zip -r -j ${TRAVIS_BUILD_DIR}/amplify-elisp-${TRAVIS_TAG}.zip ${TRAVIS_BUILD_DIR}/LICENSE ${TRAVIS_BUILD_DIR}/*.el
+- zip -r ./amplify-elisp-${TRAVIS_TAG}.zip ./LICENSE ./README.md ./depend.el ./*.el
 deploy:
   provider: releases
   skip_cleanup: true
