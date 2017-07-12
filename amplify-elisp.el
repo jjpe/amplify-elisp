@@ -7,6 +7,13 @@
 (defvar amplify-elisp/root-directory (file-name-directory load-file-name)
   "The amplify-elisp.el root directory.")
 
+(require 'depend (concat amplify-elisp/root-directory "depend.el/depend.el"))
+
+
+
+(defvar load-path nil)
+(add-to-list 'load-path amplify-elisp/root-directory)
+
 (defun amplify-elisp/path (&rest subpath-specs)
   "Calculate the absolute path out of of SUBPATH-SPECS, then return it.
 The subpath formed by concatenating the SUBPATH-SPECS will be relative
@@ -18,46 +25,90 @@ explicitly included."
                             subpath-specs)))
     (apply #'concat amplify-elisp/root-directory spec-names)))
 
+(defun amplify-elisp/subproc-path (&rest subpath-specs)
+  "Return the path to a file located in one of the sub-processes."
+  (apply #'amplify-elisp/path "subproc/" subpath-specs))
 
-(defvar amplify-elisp/current-version "0.14.2"
-  "The current semantic version of the Amplify Emacs module.")
+(defvar amplify-elisp/debug t
+  "Set to t to turn on debug mode.")
 
-(defvar amplify-elisp/current-os
+(defvar amplify-elisp/os
   (pcase system-type
     ('darwin       "osx")
     ('gnu/linux    "linux")
+    ;; ('gnu/linux    "linux-x86-64") ;; TODO:
     ;; TODO: Windows support
     (_ (error "Operating system '%s' is not supported" system-type)))
   "A tag associated with the current operating system.")
 
-(defvar amplify-elisp/module-name
-  (concat "libamplify_module-"
-          amplify-elisp/current-version
-          "-"
-          amplify-elisp/current-os
-          "-dbg.so")
-  "The name of the module dynamic library.")
 
 
-;; Download the appropriate module dynamic library if it's not already present:
-(cl-defun amplify-elisp/download-resource (url file-name)
-  "Download a resource from URL to FILE-NAME."
-  (let ((destination (amplify-elisp/path file-name)))
-    (when (file-exists-p destination)
-      (message "[amplify-elisp] using cached resource @ %s" file-name)
-      (return-from amplify-elisp/download-resource))
-    (url-copy-file url destination)))
 
-(let* ((semver amplify-elisp/current-version)
-       (url-base "https://github.com/jjpe/amplify-elisp/releases/download")
-       (url (concat url-base "/" semver "/" amplify-elisp/module-name)))
-  (amplify-elisp/download-resource url amplify-elisp/module-name))
+(defvar amplify-elisp/semver "0.15.0"
+  "The current semantic version of the Amplify Emacs module.")
+
+
+;; Download and load `libamplify_module':
+(defvar amplify-elisp/amplify-module-root-dir
+  (amplify-elisp/subproc-path "libamplify_module"))
+(defvar amplify-elisp/amplify-module-semver amplify-elisp/semver)
+(defvar amplify-elisp/amplify-module-current-dir
+  (concat amplify-elisp/amplify-module-root-dir "/"
+          amplify-elisp/amplify-module-semver))
+
+
+(defun amplify-elisp/update-amplify-module ()
+  "Update `libamplify-module'.
+Specifically the following is downloaded:
+ * `libamplify_module'-`SEMVER'-`OS'.so
+ * `libamplify_module'-`SEMVER'-`OS'-dbg.so
+For each dependency the corresponding `SEMVER's are looked up on github.com.
+The `OS' will be automatically detected.
+If it already exists, it won't be downloaded again."
+  (let* ((semver (depend/query-github-release "jjpe" "amplify-elisp"))
+         (module-dir-path (amplify-elisp/subproc-path "libamplify_module/" semver))
+         (os amplify-elisp/os)
+         (url-base "https://github.com/jjpe/amplify-elisp/releases/download")
+         (url (concat url-base "/" semver "/libamplify_module-" semver "-" os))
+         (bin (concat module-dir-path     "/libamplify_module-" semver "-" os))
+         (dbg-url (concat url-base "/" semver "/libamplify_module-" semver "-" os "-dbg"))
+         (dbg-bin (concat module-dir-path     "/libamplify_module-" semver "-" os "-dbg")))
+    (unless (file-exists-p (amplify-elisp/subproc-path))
+      (make-directory (amplify-elisp/subproc-path)))
+    (unless (file-exists-p amplify-elisp/amplify-module-root-dir)
+      (make-directory amplify-elisp/amplify-module-root-dir))
+    (unless (file-exists-p module-dir-path)
+      (make-directory module-dir-path))
+    (depend/download url bin)
+    (depend/download dbg-url dbg-bin)))
+
+(defun amplify-elisp/update-dependencies ()
+  "Update the `amplify-elisp' dependencies.
+Specifically the following is downloaded:
+ * `libamplify_module'-`SEMVER'-`OS'.so
+ * `libamplify_module'-`SEMVER'-`OS'-dbg.so
+For each dependency the corresponding `SEMVER's are looked up on github.com.
+The `OS' will be automatically detected.
+Dependencies that already exist on the file system won't be downloaded again."
+  (amplify-elisp/update-amplify-module))
+
+
+;; This needs to complete successfully BEFORE requiring `libamplify_module':
+(amplify-elisp/update-dependencies)
+
 
 
 
 
 (require 'cl-macs) ;; For early return functionality in cl-defun
-(require 'amplify-module (amplify-elisp/path amplify-elisp/module-name))
+(require 'amplify-module
+         (amplify-elisp/subproc-path "libamplify_module/"
+                                     amplify-elisp/amplify-module-semver
+                                     "/libamplify_module-"
+                                     amplify-elisp/amplify-module-semver
+                                     "-" amplify-elisp/os
+                                     (if amplify-elisp/debug  "-dbg" "")
+                                     ".so"))
 
 
 
@@ -237,4 +288,4 @@ INDENT-TOKEN: The indentation token.  Defaults to 2 spaces."
 (provide 'amplify-elisp)
 ;;; amplify-elisp.el ends here
 
-;;  LocalWords:  ast stringify
+;;  LocalWords:  ast stringify SEMVER's
