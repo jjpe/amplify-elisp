@@ -98,6 +98,12 @@ Dependencies that already exist on the file system won't be downloaded again."
 ;; This needs to complete successfully BEFORE requiring `libamplify_module':
 (amplify-elisp/update-dependencies)
 
+(let* ((semver amplify-elisp/semver)
+       (os amplify-elisp/os)
+       (dir (amplify-elisp/subproc-path "libamplify_module/" amplify-elisp/semver)))
+  (depend/wait-for-resource (concat dir "/libamplify_module-" semver "-" os ".so"))
+  (depend/wait-for-resource (concat dir "/libamplify_module-" semver "-" os "-dbg.so")))
+
 
 
 
