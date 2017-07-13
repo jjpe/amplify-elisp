@@ -1,6 +1,6 @@
 [package]
 name = "amplify_module"
-version = "0.15.1"
+version = "0.15.5"
 authors = ["Joey Ezechiëls <joey.ezechiels@gmail.com>"]
 description = "Emacs module that provides Elisp bindings for Amplify."
 
