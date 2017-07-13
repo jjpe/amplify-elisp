@@ -65,8 +65,7 @@ Specifically the following is downloaded:
 For each dependency the corresponding `SEMVER's are looked up on github.com.
 The `OS' will be automatically detected.
 If it already exists, it won't be downloaded again."
-  (let* (;; (semver (depend/query-github-release "jjpe" "amplify-elisp"))
-         (semver amplify-elisp/semver) ;; FIXME: the line above can fail
+  (let* ((semver amplify-elisp/semver)
          (module-dir-path (amplify-elisp/subproc-path "libamplify_module/" semver))
          (os amplify-elisp/os)
          (url-base (format "https://github.com/jjpe/%s/releases/download/%s"
@@ -98,15 +97,6 @@ Dependencies that already exist on the file system won't be downloaded again."
 
 ;; This needs to complete successfully BEFORE requiring `libamplify_module':
 (amplify-elisp/update-dependencies)
-
-;; (let* ((semver amplify-elisp/semver)
-;;        (os amplify-elisp/os)
-;;        (dir (amplify-elisp/subproc-path "libamplify_module/" amplify-elisp/semver)))
-;;   (depend/wait-for-resource (concat dir "/libamplify_module-" semver "-" os ".so"))
-;;   (depend/wait-for-resource (concat dir "/libamplify_module-" semver "-" os "-dbg.so")))
-
-
-
 
 
 (require 'cl-macs) ;; For early return functionality in cl-defun
