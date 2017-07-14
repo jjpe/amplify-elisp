@@ -65,22 +65,27 @@ Specifically the following is downloaded:
 For each dependency the corresponding `SEMVER's are looked up on github.com.
 The `OS' will be automatically detected.
 If it already exists, it won't be downloaded again."
-  (let* ((semver amplify-elisp/semver)
-         (module-dir-path (amplify-elisp/subproc-path "libamplify_module/" semver))
-         (os amplify-elisp/os)
+  (let* ((path-base (amplify-elisp/subproc-path "libamplify_module/"
+                                                amplify-elisp/semver))
          (url-base (format "https://github.com/jjpe/%s/releases/download/%s"
                            "amplify-elisp"
-                           semver))
-         (url (concat url-base        "/libamplify_module-" semver "-" os ".so"))
-         (bin (concat module-dir-path "/libamplify_module-" semver "-" os ".so"))
-         (dbg-url (concat url-base        "/libamplify_module-" semver "-" os "-dbg.so"))
-         (dbg-bin (concat module-dir-path "/libamplify_module-" semver "-" os "-dbg.so")))
+                           amplify-elisp/semver))
+         (bin-name     (format "libamplify_module-%s-%s.so"
+                               amplify-elisp/semver
+                               amplify-elisp/os))
+         (dbg-bin-name (format "libamplify_module-%s-%s-dbg.so"
+                               amplify-elisp/semver
+                               amplify-elisp/os))
+         (url     (concat url-base  "/" bin-name))
+         (bin     (concat path-base "/" bin-name))
+         (dbg-url (concat url-base  "/" dbg-bin-name))
+         (dbg-bin (concat path-base "/" dbg-bin-name)))
     (unless (file-exists-p (amplify-elisp/subproc-path))
       (make-directory (amplify-elisp/subproc-path)))
     (unless (file-exists-p amplify-elisp/amplify-module-root-dir)
       (make-directory amplify-elisp/amplify-module-root-dir))
-    (unless (file-exists-p module-dir-path)
-      (make-directory module-dir-path))
+    (unless (file-exists-p path-base)
+      (make-directory path-base))
     (depend/download url bin)
     (depend/download dbg-url dbg-bin)))
 
