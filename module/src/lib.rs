@@ -27,7 +27,7 @@ init_module! { (env) {
     emacs::register(env, "amplify-elisp/uclient-serialize-using-capnp",
                     Fuclient_serialize_using_capnp,  1..1,
                     "(uclient)\n\n\
-                     Use Capn Proto for serialization.")?;
+                     Use Cap'n Proto for serialization.")?;
 
     emacs::register(env, "amplify-elisp/uclient-serialize-using-json",
                     Fuclient_serialize_using_json,  1..1,
@@ -855,14 +855,6 @@ emacs_subrs! {
 
 }
 
-
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-    }
-}
 
 //  LocalWords:  uclient cclient capn Fmsg Fcclient Ast capnp
 //  LocalWords:  ast stringp listp Fcontents aclient AsyncClient
