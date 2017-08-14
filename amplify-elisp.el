@@ -29,7 +29,7 @@ explicitly included."
   "Return the path to a file located in one of the sub-processes."
   (apply #'amplify-elisp/path "subproc/" subpath-specs))
 
-(defvar amplify-elisp/debug t
+(defvar amplify-elisp/debug nil
   "Set to t to turn on debug mode.")
 
 (defvar amplify-elisp/os
