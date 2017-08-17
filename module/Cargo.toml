@@ -7,7 +7,7 @@ description = "Emacs module that provides Elisp bindings for Amplify."
 [dependencies]
 libc = "0.2"
 emacs_module_bindings = { git = "https://github.com/jjpe/emacs_module_bindings.git", tag = "v0.5.0" }
-amplify = { git = "https://github.com/jjpe/amplify", tag = "0.15.0" }
+amplify = { git = "https://github.com/jjpe/amplify", tag = "0.16.0" }
 
 [lib]
 name = "amplify_module"
