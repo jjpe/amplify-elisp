@@ -1,11 +1,11 @@
 [package]
 name = "amplify_module"
-version = "0.17.1"
+version = "0.17.2"
 authors = ["Joey Ezechiëls <joey.ezechiels@gmail.com>"]
 description = "Emacs module that provides Elisp bindings for Amplify."
 
 [dependencies]
-amplify = { git = "https://github.com/jjpe/amplify", tag = "0.17.1" }
+amplify = { git = "https://github.com/jjpe/amplify", tag = "0.17.2" }
 libc = "0.2"
 emacs_module_bindings = "0.6"
 
